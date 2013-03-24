@@ -1,4 +1,4 @@
 com.dinstone.beanstalkc
 =======================
 
-beanstalkd client based-on mina.
+Beanstalkc is beanstalkd client based on mina.

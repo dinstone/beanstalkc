@@ -36,6 +36,10 @@ public class BeanstalkClientFactory {
 
     private NioSocketConnector ioConnector;
 
+    public BeanstalkClientFactory(String hostname, int port) {
+        initIoConnector(new InetSocketAddress(hostname, port));
+    }
+
     public BeanstalkClientFactory(InetSocketAddress socketAddress) {
         initIoConnector(socketAddress);
     }

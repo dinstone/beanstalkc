@@ -35,6 +35,7 @@ public class AbstractOperation<R> implements Operation<R> {
         this.future = future;
     }
 
+    @Override
     public IoBuffer commandBuffer(Charset charset, String delimiter) {
         IoBuffer buffer = IoBuffer.allocate(64);
         buffer.setAutoExpand(true);
@@ -45,6 +46,7 @@ public class AbstractOperation<R> implements Operation<R> {
         return buffer;
     }
 
+    @Override
     public boolean parseReply(Charset charset, IoBuffer in) {
         return true;
     }
@@ -59,6 +61,7 @@ public class AbstractOperation<R> implements Operation<R> {
         return command;
     }
 
+    @Override
     public OperationFuture<R> getOperationFuture() {
         return future;
     }

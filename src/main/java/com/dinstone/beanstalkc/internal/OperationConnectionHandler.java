@@ -21,7 +21,6 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class OperationConnectionHandler extends IoHandlerAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(OperationConnectionHandler.class);

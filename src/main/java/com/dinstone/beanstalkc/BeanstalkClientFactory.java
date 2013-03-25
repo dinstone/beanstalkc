@@ -69,10 +69,12 @@ public class BeanstalkClientFactory {
 
         chain.addLast("codec", new ProtocolCodecFilter(new ProtocolCodecFactory() {
 
+            @Override
             public ProtocolEncoder getEncoder(IoSession session) throws Exception {
                 return new OperationEncoder(charset, delimiter);
             }
 
+            @Override
             public ProtocolDecoder getDecoder(IoSession session) throws Exception {
                 return new OperationDecoder(charset, delimiter);
             }

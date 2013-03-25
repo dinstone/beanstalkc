@@ -45,24 +45,28 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         this.connection = connection;
     }
 
+    @Override
     public boolean useTube(String tube) {
         UseOperation operation = new UseOperation(tube);
         connection.handle(operation);
         return getBoolean(operation.getOperationFuture());
     }
 
+    @Override
     public boolean watchTube(String tube) {
         WatchOperation operation = new WatchOperation(tube);
         connection.handle(operation);
         return getBoolean(operation.getOperationFuture());
     }
 
+    @Override
     public boolean ignoreTube(String tube) {
         IgnoreOperation operation = new IgnoreOperation(tube);
         connection.handle(operation);
         return getBoolean(operation.getOperationFuture());
     }
 
+    @Override
     public long putJob(int priority, int delay, int ttr, byte[] data) {
         PutOperation operation = new PutOperation(priority, delay, ttr, data);
         connection.handle(operation);
@@ -73,18 +77,21 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         }
     }
 
+    @Override
     public boolean deleteJob(long id) {
         DeleteOperation operation = new DeleteOperation(id);
         connection.handle(operation);
         return getBoolean(operation.getOperationFuture());
     }
 
+    @Override
     public boolean touchJob(long id) {
         TouchOperation operation = new TouchOperation(id);
         connection.handle(operation);
         return getBoolean(operation.getOperationFuture());
     }
 
+    @Override
     public Job reserveJob(long timeout) {
         ReserveOperation operation = new ReserveOperation(timeout);
         connection.handle(operation);
@@ -95,12 +102,14 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         }
     }
 
+    @Override
     public boolean releaseJob(long id, int priority, int delay) {
         ReleaseOperation operation = new ReleaseOperation(id, priority, delay);
         connection.handle(operation);
         return getBoolean(operation.getOperationFuture());
     }
 
+    @Override
     public boolean buryJob(long id, int priority) {
         BuryOperation operation = new BuryOperation(id, priority);
         connection.handle(operation);
@@ -128,6 +137,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         }
     }
 
+    @Override
     public void close() {
         connection.close();
     }

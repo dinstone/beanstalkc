@@ -36,6 +36,7 @@ public class OperationEncoder extends ProtocolEncoderAdapter {
         this.delimiter = delimiter;
     }
 
+    @Override
     public void encode(IoSession session, Object message, ProtocolEncoderOutput out) throws Exception {
         if (message instanceof Operation) {
             Operation<?> operation = (Operation<?>) message;

@@ -41,6 +41,7 @@
 					<header>license/ApacheV2.txt</header>
 					<includes>
 						<include>src/main/java/**</include>
+						<include>src/test/java/**</include>
 					</includes>
 					<properties>
 						<year>${project.inceptionYear}</year>

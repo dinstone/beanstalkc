@@ -19,7 +19,7 @@
 		</layout>
 	</appender>
 
-	<logger name="com.dinstone.pomelo.client" additivity="false">
+	<logger name="com.dinstone.beanstalkc" additivity="false">
 		<level value="debug" />
 		<appender-ref ref="console" />
 	</logger>

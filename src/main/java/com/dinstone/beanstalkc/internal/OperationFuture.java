@@ -49,7 +49,7 @@ public class OperationFuture<T> {
     public T get() throws InterruptedException {
         lock.lock();
         try {
-            if (!done) {
+            while (!done) {
                 ready.await();
             }
         } finally {

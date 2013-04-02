@@ -84,7 +84,7 @@ public class BeanstalkClientTest {
 
     @Before
     public void setUp() throws Exception {
-        factory = new BeanstalkClientFactory(new InetSocketAddress("172.17.6.41", 11300));
+        factory = new BeanstalkClientFactory(new InetSocketAddress("127.0.0.1", 11300));
     }
 
     @After
@@ -151,7 +151,7 @@ public class BeanstalkClientTest {
     public void testStrees01() {
         BeanstalkClient client = factory.createClient();
         client.useTube("streess");
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 100; i++) {
             String data = "this is data [" + i + "]";
             try {
                 long id = client.putJob(1, 0, 5000, data.getBytes());
@@ -162,10 +162,11 @@ public class BeanstalkClientTest {
         }
 
         client.watchTube("streess");
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 1000; i++) {
             Job job = client.reserveJob(1);
             if (job != null) {
-                System.out.println("reserved job is " + job.getId());
+                client.deleteJob(job.getId());
+                System.out.println("deleted job is " + job.getId());
             }
 
         }

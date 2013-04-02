@@ -28,7 +28,7 @@ public class ConnectionTest {
 
     @Before
     public void setUp() throws Exception {
-        factory = new BeanstalkClientFactory(new InetSocketAddress("172.17.6.41", 11300));
+        factory = new BeanstalkClientFactory(new InetSocketAddress("172.17.6.43", 11300));
     }
 
     @After
@@ -47,8 +47,8 @@ public class ConnectionTest {
     @Test
     public void testCreateConsumer() {
         JobConsumer consumer = factory.createClient();
-        consumer.ignoreTube("default");
         consumer.watchTube("jobs");
+        consumer.ignoreTube("default");
 
         Job job = consumer.reserveJob(1);
         if (job != null) {
@@ -60,6 +60,22 @@ public class ConnectionTest {
         if (job != null) {
             consumer.buryJob(job.getId(), 2);
             consumer.deleteJob(job.getId());
+        }
+    }
+
+    @Test
+    public void testConsumer001() {
+        JobConsumer consumer = factory.createClient();
+        consumer.watchTube("prepareMessage");
+        consumer.ignoreTube("default");
+        // consumer.deleteJob(301782);
+
+        for (int i = 0; i < 100; i++) {
+            Job job = consumer.reserveJob(1);
+            if (job != null) {
+                consumer.touchJob(job.getId());
+                consumer.releaseJob(job.getId(), 1, 1);
+            }
         }
     }
 

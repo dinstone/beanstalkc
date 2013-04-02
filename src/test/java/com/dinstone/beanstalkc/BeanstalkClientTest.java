@@ -151,14 +151,18 @@ public class BeanstalkClientTest {
     public void testStrees01() {
         BeanstalkClient client = factory.createClient();
         client.useTube("streess");
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10000; i++) {
             String data = "this is data [" + i + "]";
-            long id = client.putJob(1, 0, 5000, data.getBytes());
-            System.out.println("put job id is " + id + ", index is " + i);
+            try {
+                long id = client.putJob(1, 0, 5000, data.getBytes());
+                System.out.println("put job id is " + id + ", index is " + i);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         client.watchTube("streess");
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10000; i++) {
             Job job = client.reserveJob(1);
             if (job != null) {
                 System.out.println("reserved job is " + job.getId());

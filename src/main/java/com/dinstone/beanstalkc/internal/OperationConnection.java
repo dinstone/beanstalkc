@@ -36,11 +36,13 @@ public class OperationConnection {
         this.ioConnector = connector;
     }
 
-    public synchronized void handle(Operation<?> operation) {
+    public synchronized <T> OperationFuture<T> handle(Operation<T> operation) {
         connect();
 
         ioSession.write(operation);
         SessionUtil.getOperationQueue(ioSession).add(operation);
+
+        return operation.getOperationFuture();
     }
 
     public synchronized void connect() {

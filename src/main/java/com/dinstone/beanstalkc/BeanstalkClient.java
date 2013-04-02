@@ -17,7 +17,6 @@
 package com.dinstone.beanstalkc;
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,31 +47,28 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
     @Override
     public boolean useTube(String tube) {
         UseOperation operation = new UseOperation(tube);
-        connection.handle(operation);
-        return getBoolean(operation.getOperationFuture());
+        return getBoolean(connection.handle(operation));
     }
 
     @Override
     public boolean watchTube(String tube) {
         WatchOperation operation = new WatchOperation(tube);
-        connection.handle(operation);
-        return getBoolean(operation.getOperationFuture());
+        return getBoolean(connection.handle(operation));
     }
 
     @Override
     public boolean ignoreTube(String tube) {
         IgnoreOperation operation = new IgnoreOperation(tube);
-        connection.handle(operation);
-        return getBoolean(operation.getOperationFuture());
+        return getBoolean(connection.handle(operation));
     }
 
     @Override
     public long putJob(int priority, int delay, int ttr, byte[] data) {
         PutOperation operation = new PutOperation(priority, delay, ttr, data);
-        connection.handle(operation);
+        OperationFuture<Long> future = connection.handle(operation);
         try {
-            return operation.getOperationFuture().get();
-        } catch (InterruptedException e) {
+            return future.get(3, TimeUnit.SECONDS);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -80,24 +76,22 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
     @Override
     public boolean deleteJob(long id) {
         DeleteOperation operation = new DeleteOperation(id);
-        connection.handle(operation);
-        return getBoolean(operation.getOperationFuture());
+        return getBoolean(connection.handle(operation));
     }
 
     @Override
     public boolean touchJob(long id) {
         TouchOperation operation = new TouchOperation(id);
-        connection.handle(operation);
-        return getBoolean(operation.getOperationFuture());
+        return getBoolean(connection.handle(operation));
     }
 
     @Override
     public Job reserveJob(long timeout) {
         ReserveOperation operation = new ReserveOperation(timeout);
-        connection.handle(operation);
+        OperationFuture<Job> future = connection.handle(operation);
         try {
-            return operation.getOperationFuture().get();
-        } catch (InterruptedException e) {
+            return future.get(3, TimeUnit.SECONDS);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -105,40 +99,31 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
     @Override
     public boolean releaseJob(long id, int priority, int delay) {
         ReleaseOperation operation = new ReleaseOperation(id, priority, delay);
-        connection.handle(operation);
-        return getBoolean(operation.getOperationFuture());
+        return getBoolean(connection.handle(operation));
     }
 
     @Override
     public boolean buryJob(long id, int priority) {
         BuryOperation operation = new BuryOperation(id, priority);
-        connection.handle(operation);
-        return getBoolean(operation.getOperationFuture());
+        return getBoolean(connection.handle(operation));
     }
 
     public void quit() {
         QuitOperation operation = new QuitOperation();
-        connection.handle(operation);
-        try {
-            Boolean f = operation.getOperationFuture().get(1, TimeUnit.SECONDS);
-            LOG.debug("reply is {}", f);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (TimeoutException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private boolean getBoolean(OperationFuture<Boolean> future) {
-        try {
-            return future.get();
-        } catch (InterruptedException e) {
-            return false;
-        }
+        getBoolean(connection.handle(operation));
     }
 
     @Override
     public void close() {
         connection.close();
+    }
+
+    private boolean getBoolean(OperationFuture<Boolean> future) {
+        try {
+            return future.get(3, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            LOG.debug("error message", e);
+            return false;
+        }
     }
 }

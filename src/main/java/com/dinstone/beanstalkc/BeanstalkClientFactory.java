@@ -25,7 +25,10 @@ import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.ProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolEncoder;
+import org.apache.mina.transport.socket.SocketSessionConfig;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dinstone.beanstalkc.internal.OperationConnection;
 import com.dinstone.beanstalkc.internal.OperationConnectionHandler;
@@ -33,6 +36,8 @@ import com.dinstone.beanstalkc.internal.codec.OperationDecoder;
 import com.dinstone.beanstalkc.internal.codec.OperationEncoder;
 
 public class BeanstalkClientFactory {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BeanstalkClientFactory.class);
 
     private NioSocketConnector ioConnector;
 
@@ -65,12 +70,15 @@ public class BeanstalkClientFactory {
     private void initIoConnector(InetSocketAddress socketAddress) {
         // create connector
         ioConnector = new NioSocketConnector();
+        SocketSessionConfig sessionConfig = ioConnector.getSessionConfig();
+        LOG.debug("ReadBufferSize is {}", sessionConfig.getReadBufferSize());
+        LOG.debug("SendBufferSize is {}", sessionConfig.getSendBufferSize());
+
         // add filter
         DefaultIoFilterChainBuilder chain = ioConnector.getFilterChain();
 
         final Charset charset = Charset.forName("utf-8");
         final String delimiter = "\r\n";
-
         chain.addLast("codec", new ProtocolCodecFilter(new ProtocolCodecFactory() {
 
             @Override

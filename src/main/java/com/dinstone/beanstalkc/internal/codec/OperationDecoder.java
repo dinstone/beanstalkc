@@ -34,9 +34,6 @@ public class OperationDecoder extends CumulativeProtocolDecoder {
 
     private String delimiter;
 
-    /** 2^16 */
-    private int maxLength = 64 * 1024;
-
     /** An IoBuffer containing the delimiter */
     private IoBuffer delimBuf;
 
@@ -61,25 +58,22 @@ public class OperationDecoder extends CumulativeProtocolDecoder {
     protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
         // Remember the initial position.
         int start = in.position();
-        int index = 0;
+
         int matchCount = 0;
+        int delimLen = delimBuf.limit();
         while (in.hasRemaining()) {
             byte current = in.get();
-
-            if (++index > maxLength) {
-                throw new RuntimeException("Line is too long than " + maxLength);
-            }
 
             if (current == delimBuf.get(matchCount)) {
                 matchCount++;
 
-                if (delimBuf.limit() == matchCount) {
+                if (delimLen == matchCount) {
                     // Remember the current position and limit.
                     int position = in.position();
                     int limit = in.limit();
                     try {
                         in.position(start);
-                        in.limit(position - 2);
+                        in.limit(position - delimLen);
                         // The bytes between in.position() and in.limit()
                         // can't contain a full CRLF terminated line.
                         parse(session, in.slice(), out);
@@ -125,15 +119,4 @@ public class OperationDecoder extends CumulativeProtocolDecoder {
             queue.remove();
         }
     }
-
-    /**
-     * the maxLength to set
-     * 
-     * @param maxLength
-     * @see OperationDecoder#maxLength
-     */
-    public void setMaxLength(int maxLength) {
-        this.maxLength = maxLength + delimBuf.limit();
-    }
-
 }

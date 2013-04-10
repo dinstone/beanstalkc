@@ -25,66 +25,11 @@ import org.junit.Test;
 
 public class BeanstalkClientTest {
 
-    private static class WorkThread extends Thread {
-
-        private BeanstalkClient client;
-
-        private CountDownLatch startLatch;
-
-        private CountDownLatch doneLatch;
-
-        /**
-         * @param client
-         * @param startLatch
-         * @param doneLatch
-         */
-        public WorkThread(BeanstalkClient client, CountDownLatch startLatch, CountDownLatch doneLatch) {
-            super();
-            this.client = client;
-            this.startLatch = startLatch;
-            this.doneLatch = doneLatch;
-        }
-
-        /**
-         * {@inheritDoc}
-         * 
-         * @see java.lang.Thread#run()
-         */
-        @Override
-        public void run() {
-            try {
-                startLatch.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                return;
-            }
-            client.useTube(this.getName());
-
-            client.watchTube(this.getName());
-
-            String data = "this is data [" + this.getName() + "]";
-            client.putJob(1, 0, 5000, data.getBytes());
-
-            Job job = client.reserveJob(1);
-
-            client.releaseJob(job.getId(), 1, 1);
-
-            job = client.reserveJob(1);
-
-            client.buryJob(job.getId(), 2);
-
-            client.deleteJob(job.getId());
-
-            doneLatch.countDown();
-        }
-
-    }
-
     private BeanstalkClientFactory factory;
 
     @Before
     public void setUp() throws Exception {
-        factory = new BeanstalkClientFactory(new InetSocketAddress("172.17.6.41", 11300));
+        factory = new BeanstalkClientFactory(new InetSocketAddress("127.0.0.1", 11300));
     }
 
     @After
@@ -149,6 +94,8 @@ public class BeanstalkClientTest {
 
     @Test
     public void testStrees01() {
+        long st = System.currentTimeMillis();
+
         BeanstalkClient client = factory.createClient();
         client.useTube("streess");
         for (int i = 0; i < 10000; i++) {
@@ -161,14 +108,23 @@ public class BeanstalkClientTest {
             }
         }
 
+        long et = System.currentTimeMillis();
+        System.out.println("cost is " + (et - st) + "ms");
+
+        st = System.currentTimeMillis();
+
         client.watchTube("streess");
         for (int i = 0; i < 10000; i++) {
             Job job = client.reserveJob(1);
             if (job != null) {
-                System.out.println("reserved job is " + job.getId());
+                client.deleteJob(job.getId());
+                System.out.println("deleted job is " + job.getId());
             }
 
         }
+
+        et = System.currentTimeMillis();
+        System.out.println("cost is " + (et - st) + "ms");
     }
 
     @Test
@@ -220,6 +176,70 @@ public class BeanstalkClientTest {
         BeanstalkClient client = factory.createClient();
         Job job = client.reserveJob(1);
         client.buryJob(job.getId(), 1);
+    }
+
+    private static class WorkThread extends Thread {
+
+        private BeanstalkClient client;
+
+        private CountDownLatch startLatch;
+
+        private CountDownLatch doneLatch;
+
+        /**
+         * @param client
+         * @param startLatch
+         * @param doneLatch
+         */
+        public WorkThread(BeanstalkClient client, CountDownLatch startLatch, CountDownLatch doneLatch) {
+            super();
+            this.client = client;
+            this.startLatch = startLatch;
+            this.doneLatch = doneLatch;
+        }
+
+        /**
+         * {@inheritDoc}
+         * 
+         * @see java.lang.Thread#run()
+         */
+        @Override
+        public void run() {
+            try {
+                startLatch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return;
+            }
+            client.useTube(this.getName());
+
+            client.watchTube(this.getName());
+
+            for (int i = 0; i < 100; i++) {
+                bc();
+            }
+
+            doneLatch.countDown();
+        }
+
+        /**
+         *
+         */
+        private void bc() {
+            String data = "this is data [" + this.getName() + "]";
+            client.putJob(1, 0, 5000, data.getBytes());
+
+            Job job = client.reserveJob(1);
+
+            client.releaseJob(job.getId(), 1, 1);
+
+            job = client.reserveJob(1);
+
+            client.buryJob(job.getId(), 2);
+
+            client.deleteJob(job.getId());
+        }
+
     }
 
 }

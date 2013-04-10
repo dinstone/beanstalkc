@@ -39,8 +39,8 @@ public class OperationConnection {
     public synchronized <T> OperationFuture<T> handle(Operation<T> operation) {
         connect();
 
-        ioSession.write(operation);
         SessionUtil.getOperationQueue(ioSession).add(operation);
+        ioSession.write(operation);
 
         return operation.getOperationFuture();
     }

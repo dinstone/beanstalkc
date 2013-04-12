@@ -16,20 +16,10 @@
 
 package com.dinstone.beanstalkc;
 
-import java.net.InetSocketAddress;
-
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 public class ConnectionTest {
-
-    private BeanstalkClientFactory factory;
-
-    @Before
-    public void setUp() throws Exception {
-        factory = new BeanstalkClientFactory(new InetSocketAddress("172.17.6.43", 11300));
-    }
 
     @After
     public void tearDown() throws Exception {
@@ -37,7 +27,7 @@ public class ConnectionTest {
 
     @Test
     public void testCreateProducer() {
-        JobProducer producer = factory.createClient();
+        JobProducer producer = new BeanstalkClient();
         producer.useTube("jobs");
 
         long id = producer.putJob(1, 0, 5000, "this is some data".getBytes());
@@ -46,7 +36,7 @@ public class ConnectionTest {
 
     @Test
     public void testCreateConsumer() {
-        JobConsumer consumer = factory.createClient();
+        JobConsumer consumer = new BeanstalkClient();
         consumer.watchTube("jobs");
         consumer.ignoreTube("default");
 
@@ -65,12 +55,12 @@ public class ConnectionTest {
 
     @Test
     public void testConsumer001() {
-        JobConsumer consumer = factory.createClient();
+        JobConsumer consumer = new BeanstalkClient();
         consumer.watchTube("prepareMessage");
         consumer.ignoreTube("default");
         // consumer.deleteJob(301782);
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             Job job = consumer.reserveJob(1);
             if (job != null) {
                 consumer.touchJob(job.getId());

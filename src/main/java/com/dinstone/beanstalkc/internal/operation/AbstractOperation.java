@@ -22,6 +22,14 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import com.dinstone.beanstalkc.internal.OperationFuture;
 
+/**
+ * Beanstalk protocol details please refer to the link:
+ * <code> https://github.com/kr/beanstalkd/blob/master/doc/protocol.txt
+ * </code>
+ * 
+ * @author guojf
+ * @version 1.0.0.2013-4-11
+ */
 public class AbstractOperation<R> implements Operation<R> {
 
     protected final Charset charset;

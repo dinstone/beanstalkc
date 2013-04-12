@@ -14,12 +14,13 @@
  * the License.
  */
 
-package com.dinstone.beanstalkc;
+package com.dinstone.beanstalkc.internal;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
+import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
@@ -30,44 +31,34 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dinstone.beanstalkc.internal.OperationConnection;
-import com.dinstone.beanstalkc.internal.OperationConnectionHandler;
+import com.dinstone.beanstalkc.Configuration;
 import com.dinstone.beanstalkc.internal.codec.OperationDecoder;
 import com.dinstone.beanstalkc.internal.codec.OperationEncoder;
 
-public class BeanstalkClientFactory {
+/**
+ * @author guojf
+ * @version 1.0.0.2013-4-11
+ */
+public class SocketConnector implements Connector {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BeanstalkClientFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SocketConnector.class);
 
     private NioSocketConnector ioConnector;
 
-    public BeanstalkClientFactory(String hostname, int port) {
-        initIoConnector(new InetSocketAddress(hostname, port));
-    }
+    private int refCount;
 
-    public BeanstalkClientFactory(InetSocketAddress socketAddress) {
-        initIoConnector(socketAddress);
-    }
-
-    public BeanstalkClient createClient() {
-        OperationConnection con = createConnection();
-        return new BeanstalkClient(con);
-    }
-
-    public void dispose() {
-        ioConnector.dispose();
-    }
-
-    private OperationConnection createConnection() {
-        return new OperationConnection(ioConnector);
+    /**
+     * @param config
+     * @param ioConnector
+     */
+    public SocketConnector(Configuration config) {
+        initConnector(config);
     }
 
     /**
-     * initialize socket connector
-     * 
-     * @param socketAddress
+     * @param config
      */
-    private void initIoConnector(InetSocketAddress socketAddress) {
+    private void initConnector(Configuration config) {
         // create connector
         ioConnector = new NioSocketConnector();
         SocketSessionConfig sessionConfig = ioConnector.getSessionConfig();
@@ -93,8 +84,54 @@ public class BeanstalkClientFactory {
         }));
 
         // set handler
-        ioConnector.setHandler(new OperationConnectionHandler());
-        ioConnector.setDefaultRemoteAddress(socketAddress);
+        ioConnector.setHandler(new ConnectionHandler());
+
+        InetSocketAddress address = new InetSocketAddress(config.getRemoteHost(), config.getRemotePort());
+        ioConnector.setDefaultRemoteAddress(address);
     }
 
+    /**
+     * @return
+     */
+    @Override
+    public IoSession createSession() {
+        // create session
+        ConnectFuture cf = ioConnector.connect();
+        cf.awaitUninterruptibly();
+
+        return cf.getSession();
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.internal.Connector#dispose()
+     */
+    @Override
+    public void dispose() {
+        ioConnector.dispose(false);
+    }
+
+    /**
+     *
+     */
+    public void incrementRefCount() {
+        ++refCount;
+    }
+
+    /**
+     *
+     */
+    public void decrementRefCount() {
+        if (refCount > 0) {
+            --refCount;
+        }
+    }
+
+    /**
+     * @return
+     */
+    public boolean isZeroRefCount() {
+        return refCount == 0;
+    }
 }

@@ -18,24 +18,31 @@ package com.dinstone.beanstalkc.internal;
 
 import java.util.Queue;
 
-import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.session.IoSession;
-import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
+import com.dinstone.beanstalkc.Configuration;
 import com.dinstone.beanstalkc.internal.operation.Operation;
 
-public class OperationConnection {
+public class OperationConnection implements Connection {
 
-    private final NioSocketConnector ioConnector;
-
-    private boolean stopped;
+    private boolean closed;
 
     private IoSession ioSession;
 
-    public OperationConnection(NioSocketConnector connector) {
-        this.ioConnector = connector;
+    private Configuration config;
+
+    private Connector socketConnector;
+
+    /**
+     * @param config2
+     * @param cValue
+     */
+    public OperationConnection(Configuration config, Connector socketConnector) {
+        this.config = config;
+        this.socketConnector = socketConnector;
     }
 
+    @Override
     public synchronized <T> OperationFuture<T> handle(Operation<T> operation) {
         connect();
 
@@ -45,66 +52,60 @@ public class OperationConnection {
         return operation.getOperationFuture();
     }
 
-    public synchronized void connect() {
-        if (stopped) {
+    private void connect() {
+        if (closed) {
             throw new RuntimeException("connection is closed");
         }
 
         if (!isConnected()) {
-            createSession();
+            ioSession = socketConnector.createSession();
+            SessionUtil.setConnection(ioSession, this);
         }
     }
 
-    public synchronized boolean reconnect() {
-        try {
-            destroySession(null);
-
-            connect();
-
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
+    @Override
     public synchronized void close() {
-        destroySession(null);
-        stopped = true;
+        destroy();
+        closed = true;
     }
 
-    public synchronized void destroySession(Throwable cause) {
+    @Override
+    public synchronized void destroy() {
         if (isConnected()) {
-            if (cause == null) {
-                cause = new RuntimeException("connection is closed");
-            }
-
             Queue<Operation<?>> queue = SessionUtil.getOperationQueue(ioSession);
             while (true) {
                 Operation<?> operation = queue.poll();
                 if (operation == null) {
                     break;
                 }
-                operation.getOperationFuture().setException(cause);
+                operation.getOperationFuture().setException(new RuntimeException("connection is closed"));
             }
 
             ioSession.close(true);
-            ioSession = null;
         }
-    }
-
-    private void createSession() {
-        // create session
-        ConnectFuture cf = ioConnector.connect();
-        cf.awaitUninterruptibly();
-
-        ioSession = cf.getSession();
-
-        SessionUtil.createOperationQueue(ioSession);
-        SessionUtil.setOperationConnection(ioSession, this);
+        ioSession = null;
     }
 
     private boolean isConnected() {
         return ioSession != null && ioSession.isConnected();
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public Configuration getConfiguration() {
+        return config;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.internal.Connection#isClosed()
+     */
+    @Override
+    public boolean isClosed() {
+        return closed;
     }
 
 }

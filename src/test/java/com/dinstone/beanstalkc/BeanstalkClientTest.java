@@ -16,155 +16,65 @@
 
 package com.dinstone.beanstalkc;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.CountDownLatch;
-
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 public class BeanstalkClientTest {
 
-    private BeanstalkClientFactory factory;
+    private BeanstalkClient client;
 
     @Before
     public void setUp() throws Exception {
-        factory = new BeanstalkClientFactory(new InetSocketAddress("127.0.0.1", 11300));
+        client = new BeanstalkClient();
     }
 
     @After
     public void tearDown() throws Exception {
-        factory.dispose();
-    }
-
-    /**
-     * Multiple threads share the same client.
-     */
-    @Test
-    public void testStrees() {
-        final CountDownLatch doneLatch = new CountDownLatch(6);
-        final CountDownLatch startLatch = new CountDownLatch(1);
-        BeanstalkClient sameClient = factory.createClient();
-
-        // create thread for test case
-        for (int i = 0; i < 6; i++) {
-            Thread t = new WorkThread(sameClient, startLatch, doneLatch);
-            t.setName("t-" + i);
-            t.start();
-        }
-
-        try {
-            startLatch.countDown();
-            long anyStart = System.currentTimeMillis();
-            doneLatch.await();
-            long anyEnd = System.currentTimeMillis();
-            System.out.println("this case(share same client) take " + (anyEnd - anyStart) + " ms");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        sameClient.close();
-    }
-
-    /**
-     * Each thread creates a client
-     */
-    @Test
-    public void testStrees00() {
-        final CountDownLatch doneLatch = new CountDownLatch(6);
-        final CountDownLatch startLatch = new CountDownLatch(1);
-        // create thread for test case
-        for (int i = 0; i < 6; i++) {
-            Thread t = new WorkThread(factory.createClient(), startLatch, doneLatch);
-            t.setName("t-" + i);
-            t.start();
-        }
-
-        try {
-            startLatch.countDown();
-            long anyStart = System.currentTimeMillis();
-            doneLatch.await();
-            long anyEnd = System.currentTimeMillis();
-            System.out.println("this case(single client per thread) take " + (anyEnd - anyStart) + " ms");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @Test
-    public void testStrees01() {
-        long st = System.currentTimeMillis();
-
-        BeanstalkClient client = factory.createClient();
-        client.useTube("streess");
-        for (int i = 0; i < 10000; i++) {
-            String data = "this is data [" + i + "]";
-            try {
-                long id = client.putJob(1, 0, 5000, data.getBytes());
-                System.out.println("put job id is " + id + ", index is " + i);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        long et = System.currentTimeMillis();
-        System.out.println("cost is " + (et - st) + "ms");
-
-        st = System.currentTimeMillis();
-
-        client.watchTube("streess");
-        for (int i = 0; i < 10000; i++) {
-            Job job = client.reserveJob(1);
-            if (job != null) {
-                client.deleteJob(job.getId());
-                System.out.println("deleted job is " + job.getId());
-            }
-
-        }
-
-        et = System.currentTimeMillis();
-        System.out.println("cost is " + (et - st) + "ms");
+        client.close();
     }
 
     @Test
     public void testUseTube() {
-        BeanstalkClient client = factory.createClient();
-        client.useTube("batchflow/request");
+        boolean f = client.useTube("batchflow/request");
+        Assert.assertTrue(f);
     }
 
     @Test
     public void testWatchTube() {
-        BeanstalkClient client = factory.createClient();
-        client.watchTube("br");
+        boolean f = client.watchTube("br");
+        Assert.assertTrue(f);
     }
 
     @Test
     public void testPutJob() {
-        BeanstalkClient client = factory.createClient();
         long id = client.putJob(1, 0, 5000, "this is some data".getBytes());
-        System.out.println(id);
+        Assert.assertTrue(id != 0);
     }
 
     @Test
     public void testPutJob01() {
-        BeanstalkClient client = factory.createClient();
         long id = client.putJob(1, 0, 5000, new byte[1024 * 6]);
-        System.out.println(id);
+        Assert.assertTrue(id != 0);
     }
 
     @Test
     public void testReserveJob() {
-        BeanstalkClient client = factory.createClient();
         Job job = client.reserveJob(1);
-        client.releaseJob(job.getId(), 1, 1);
+        Assert.assertNotNull(job);
+
+        boolean f = client.releaseJob(job.getId(), 1, 1);
+        Assert.assertTrue(f);
     }
 
     @Test
     public void testDeleteJob() {
-        BeanstalkClient client = factory.createClient();
         Job job = client.reserveJob(1);
-        client.deleteJob(job.getId());
+        Assert.assertNotNull(job);
+
+        boolean f = client.deleteJob(job.getId());
+        Assert.assertTrue(f);
     }
 
     @Test
@@ -173,73 +83,21 @@ public class BeanstalkClientTest {
 
     @Test
     public void testBury() {
-        BeanstalkClient client = factory.createClient();
         Job job = client.reserveJob(1);
-        client.buryJob(job.getId(), 1);
+        Assert.assertNotNull(job);
+        boolean f = client.buryJob(job.getId(), 1);
+        Assert.assertTrue(f);
     }
 
-    private static class WorkThread extends Thread {
+    @Test
+    public void testPutJob02() {
+        long id = client.putJob(1, 0, 5000, "this is some \r\n data".getBytes());
+        System.out.println(id);
+        Assert.assertTrue(id != 0);
 
-        private BeanstalkClient client;
-
-        private CountDownLatch startLatch;
-
-        private CountDownLatch doneLatch;
-
-        /**
-         * @param client
-         * @param startLatch
-         * @param doneLatch
-         */
-        public WorkThread(BeanstalkClient client, CountDownLatch startLatch, CountDownLatch doneLatch) {
-            super();
-            this.client = client;
-            this.startLatch = startLatch;
-            this.doneLatch = doneLatch;
-        }
-
-        /**
-         * {@inheritDoc}
-         * 
-         * @see java.lang.Thread#run()
-         */
-        @Override
-        public void run() {
-            try {
-                startLatch.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                return;
-            }
-            client.useTube(this.getName());
-
-            client.watchTube(this.getName());
-
-            for (int i = 0; i < 100; i++) {
-                bc();
-            }
-
-            doneLatch.countDown();
-        }
-
-        /**
-         *
-         */
-        private void bc() {
-            String data = "this is data [" + this.getName() + "]";
-            client.putJob(1, 0, 5000, data.getBytes());
-
-            Job job = client.reserveJob(1);
-
-            client.releaseJob(job.getId(), 1, 1);
-
-            job = client.reserveJob(1);
-
-            client.buryJob(job.getId(), 2);
-
-            client.deleteJob(job.getId());
-        }
-
+        Job job = client.reserveJob(1);
+        Assert.assertNotNull(job);
+        Assert.assertEquals(id, job.getId());
     }
 
 }

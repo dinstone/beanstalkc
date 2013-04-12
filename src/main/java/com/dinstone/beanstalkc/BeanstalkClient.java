@@ -18,10 +18,8 @@ package com.dinstone.beanstalkc;
 
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.dinstone.beanstalkc.internal.OperationConnection;
+import com.dinstone.beanstalkc.internal.Connection;
+import com.dinstone.beanstalkc.internal.ConnectionFactory;
 import com.dinstone.beanstalkc.internal.OperationFuture;
 import com.dinstone.beanstalkc.internal.operation.BuryOperation;
 import com.dinstone.beanstalkc.internal.operation.DeleteOperation;
@@ -34,14 +32,33 @@ import com.dinstone.beanstalkc.internal.operation.TouchOperation;
 import com.dinstone.beanstalkc.internal.operation.UseOperation;
 import com.dinstone.beanstalkc.internal.operation.WatchOperation;
 
+/**
+ * This is the client implementation of the beanstalkd protocol.
+ * 
+ * @author guojf
+ * @version 1.0.0.2013-4-11
+ */
 public class BeanstalkClient implements JobProducer, JobConsumer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BeanstalkClient.class);
+    private Connection connection;
 
-    private OperationConnection connection;
+    private long optionTimeout;
 
-    public BeanstalkClient(OperationConnection connection) {
-        this.connection = connection;
+    public BeanstalkClient() {
+        this(new Configuration());
+    }
+
+    /**
+     * @param config
+     */
+    public BeanstalkClient(Configuration config) {
+        if (config == null) {
+            throw new IllegalArgumentException("config is null");
+        }
+        this.optionTimeout = config.getLong(Configuration.OPTION_TIMEOUT, 1);
+
+        ConnectionFactory factory = ConnectionFactory.getInstance();
+        this.connection = factory.createConnection(config);
     }
 
     @Override
@@ -62,12 +79,17 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         return getBoolean(connection.handle(operation));
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.JobProducer#putJob(int, int, int, byte[])
+     */
     @Override
     public long putJob(int priority, int delay, int ttr, byte[] data) {
         PutOperation operation = new PutOperation(priority, delay, ttr, data);
         OperationFuture<Long> future = connection.handle(operation);
         try {
-            return future.get(3, TimeUnit.SECONDS);
+            return future.get(optionTimeout, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -90,7 +112,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         ReserveOperation operation = new ReserveOperation(timeout);
         OperationFuture<Job> future = connection.handle(operation);
         try {
-            return future.get(3, TimeUnit.SECONDS);
+            return future.get(optionTimeout, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -116,13 +138,15 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
     @Override
     public void close() {
         connection.close();
+
+        ConnectionFactory factory = ConnectionFactory.getInstance();
+        factory.releaseConnection(connection.getConfiguration());
     }
 
     private boolean getBoolean(OperationFuture<Boolean> future) {
         try {
-            return future.get(3, TimeUnit.SECONDS);
+            return future.get(optionTimeout, TimeUnit.SECONDS);
         } catch (Exception e) {
-            LOG.debug("error message", e);
             return false;
         }
     }

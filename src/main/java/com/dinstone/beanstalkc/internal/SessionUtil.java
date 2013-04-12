@@ -27,20 +27,19 @@ public class SessionUtil {
 
     @SuppressWarnings("unchecked")
     public static Queue<Operation<?>> getOperationQueue(IoSession session) {
-        return (Queue<Operation<?>>) session.getAttribute("OPERATION_QUEUE");
+        Queue<Operation<?>> optQueue = (Queue<Operation<?>>) session.getAttribute("OPERATION_QUEUE");
+        if (optQueue == null) {
+            optQueue = new ConcurrentLinkedQueue<Operation<?>>();
+            session.setAttribute("OPERATION_QUEUE", optQueue);
+        }
+        return optQueue;
     }
 
-    public static Queue<Operation<?>> createOperationQueue(IoSession session) {
-        Queue<Operation<?>> queue = new ConcurrentLinkedQueue<Operation<?>>();
-        session.setAttribute("OPERATION_QUEUE", queue);
-        return queue;
+    public static void setConnection(IoSession session, Connection connection) {
+        session.setAttribute(Connection.class.getName(), connection);
     }
 
-    public static void setOperationConnection(IoSession session, OperationConnection connection) {
-        session.setAttribute(OperationConnection.class.getName(), connection);
-    }
-
-    public static OperationConnection getOperationConnection(IoSession session) {
-        return (OperationConnection) session.getAttribute(OperationConnection.class.getName());
+    public static Connection getConnection(IoSession session) {
+        return (Connection) session.getAttribute(Connection.class.getName());
     }
 }

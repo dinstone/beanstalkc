@@ -21,22 +21,20 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OperationConnectionHandler extends IoHandlerAdapter {
+public class ConnectionHandler extends IoHandlerAdapter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OperationConnectionHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConnectionHandler.class);
 
     @Override
     public void sessionClosed(IoSession session) throws Exception {
-        OperationConnection connect = SessionUtil.getOperationConnection(session);
-        connect.destroySession(new RuntimeException("connection is closed"));
+        LOG.info("session[{}] is closed", session.getId());
     }
 
     @Override
     public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
-        LOG.error("Unhandled I/O Exception", cause);
-        OperationConnection connect = SessionUtil.getOperationConnection(session);
-        connect.destroySession(cause);
-        connect.reconnect();
+        LOG.error("Unhandled Exception", cause);
+        Connection connection = SessionUtil.getConnection(session);
+        connection.destroy();
     }
 
 }

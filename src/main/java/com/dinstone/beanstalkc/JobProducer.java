@@ -16,11 +16,49 @@
 
 package com.dinstone.beanstalkc;
 
+import java.util.concurrent.TimeUnit;
+
 public interface JobProducer {
 
+    /**
+     * The "use" command is for producers. Subsequent put commands will put jobs
+     * into the tube specified by this command. If no use command has been
+     * issued, jobs will be put into the tube named "default".
+     * 
+     * @param tube
+     *        is a name at most 200 bytes. It specifies the tube to use. If the
+     *        tube does not exist, it will be created.
+     * @return
+     */
     public boolean useTube(String tube);
 
+    /**
+     * It inserts a job into the client's currently used tube.
+     * 
+     * @param priority
+     *        an integer < 2**32. Jobs with smaller priority values will be
+     *        scheduled before jobs with larger priorities. The most urgent
+     *        priority is 0; the least urgent priority is 4,294,967,295.
+     * @param delay
+     *        {@link TimeUnit.SECONDS}
+     * @param ttr
+     *        {@link TimeUnit.SECONDS} time to run -- is an integer number of
+     *        seconds to allow a worker to run this job. This time is counted
+     *        from the moment a worker reserves this job. If the worker does not
+     *        delete, release, or bury the job within <ttr> seconds, the job
+     *        will time out and the server will release the job. The minimum ttr
+     *        is 1. If the client sends 0, the server will silently increase the
+     *        ttr to 1.
+     * @param data
+     *        the job body,that length is an integer indicating the size of the
+     *        job body, not including the trailing "\r\n". This value must be
+     *        less than max-job-size (default: 2**16).
+     * @return the integer id of the new job
+     */
     public long putJob(int priority, int delay, int ttr, byte[] data);
 
+    /**
+     * close producer.
+     */
     public void close();
 }

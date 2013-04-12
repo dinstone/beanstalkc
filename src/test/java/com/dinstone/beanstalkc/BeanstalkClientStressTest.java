@@ -93,8 +93,7 @@ public class BeanstalkClientStressTest {
             String data = "this is data [" + i + "]";
             try {
                 long id = client.putJob(1, 0, 5000, data.getBytes());
-                // System.out.println("put job id is " + id + ", index is " +
-                // i);
+                System.out.println("put job id is " + id + ", index is " + i);
             } catch (Exception e) {
                 e.printStackTrace();
                 // System.out.println("error = " + e.getMessage());

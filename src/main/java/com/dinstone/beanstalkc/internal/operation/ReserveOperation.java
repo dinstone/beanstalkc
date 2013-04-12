@@ -92,4 +92,19 @@ public class ReserveOperation extends AbstractOperation<Job> {
         }
         return true;
     }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.internal.operation.AbstractOperation#expect()
+     */
+    @Override
+    public int expect() {
+        if (reserved != null) {
+            return reserved.length;
+        }
+
+        return 0;
+    }
+
 }

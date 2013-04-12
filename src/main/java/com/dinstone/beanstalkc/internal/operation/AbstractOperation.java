@@ -74,4 +74,14 @@ public class AbstractOperation<R> implements Operation<R> {
         return future;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.internal.operation.Operation#expect()
+     */
+    @Override
+    public int expect() {
+        return 0;
+    }
+
 }

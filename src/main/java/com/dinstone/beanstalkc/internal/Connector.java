@@ -28,8 +28,6 @@ public interface Connector {
      * @return
      */
     public IoSession createSession();
-    
-    
 
     /**
      *

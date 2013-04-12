@@ -29,4 +29,11 @@ public interface Operation<R> {
     public boolean parseReply(Charset charset, IoBuffer in);
 
     public OperationFuture<R> getOperationFuture();
+
+    /**
+     * expect byte size.
+     * 
+     * @return
+     */
+    public int expect();
 }

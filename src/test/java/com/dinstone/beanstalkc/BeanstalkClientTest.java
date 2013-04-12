@@ -97,7 +97,6 @@ public class BeanstalkClientTest {
 
         Job job = client.reserveJob(1);
         Assert.assertNotNull(job);
-        Assert.assertEquals(id, job.getId());
     }
 
 }

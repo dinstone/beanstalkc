@@ -24,15 +24,11 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.dinstone.beanstalkc.internal.SessionUtil;
 import com.dinstone.beanstalkc.internal.operation.Operation;
 
 public class OperationDecoder extends CumulativeProtocolDecoder {
-
-    private static final Logger LOG = LoggerFactory.getLogger(OperationDecoder.class);
 
     private Charset charset;
 
@@ -60,6 +56,57 @@ public class OperationDecoder extends CumulativeProtocolDecoder {
 
     @Override
     protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
+        Queue<Operation<?>> queue = SessionUtil.getOperationQueue(session);
+        Operation<?> operation = queue.peek();
+
+        int expect = operation.expect();
+        if (expect == 0) {
+            return parseStatusLine(session, in, out);
+        } else {
+            return parseDataBody(session, in, out, expect);
+        }
+    }
+
+    /**
+     * @param session
+     * @param in
+     * @param out
+     * @param expect
+     * @return
+     */
+    private boolean parseDataBody(IoSession session, IoBuffer in, ProtocolDecoderOutput out, int expect) {
+        int delimLen = delimBuf.limit();
+        int len = expect + delimLen;
+        if (in.remaining() >= len) {
+            // Remember the current position and limit.
+            int position = in.position();
+            int limit = in.limit();
+            try {
+                in.limit(position + len);
+                // The bytes between in.position() and in.limit()
+                // can't contain a full CRLF terminated line.
+                parse(session, in.slice(), out);
+            } finally {
+                // Set the position to point right after the
+                // detected line and set the limit to the old
+                // one.
+                in.limit(limit);
+                in.position(position + len);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param session
+     * @param in
+     * @param out
+     * @return
+     */
+    private boolean parseStatusLine(IoSession session, IoBuffer in, ProtocolDecoderOutput out) {
         // Remember the initial position.
         int start = in.position();
 
@@ -112,11 +159,6 @@ public class OperationDecoder extends CumulativeProtocolDecoder {
     private void parse(IoSession session, IoBuffer in, ProtocolDecoderOutput out) {
         Queue<Operation<?>> queue = SessionUtil.getOperationQueue(session);
         Operation<?> operation = queue.peek();
-
-        // if (operation == null) {
-        // LOG.warn("No operation can parse the message.");
-        // return;
-        // }
 
         boolean finish = operation.parseReply(charset, in);
         if (finish) {

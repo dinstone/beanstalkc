@@ -22,150 +22,569 @@ import org.junit.Test;
 
 public class BeanstalkClientStressTest {
 
-    /**
-     * Multiple threads share the same client.
-     */
-    @Test
-    public void testStrees() {
-        final CountDownLatch doneLatch = new CountDownLatch(6);
-        final CountDownLatch startLatch = new CountDownLatch(1);
-        BeanstalkClient sameClient = new BeanstalkClient();
-
-        // create thread for test case
-        for (int i = 0; i < 6; i++) {
-            Thread t = new WorkThread(sameClient, startLatch, doneLatch);
-            t.setName("t-" + i);
-            t.start();
-        }
-
-        try {
-            startLatch.countDown();
-            long anyStart = System.currentTimeMillis();
-            doneLatch.await();
-            long anyEnd = System.currentTimeMillis();
-            System.out.println("this case(share same client) take " + (anyEnd - anyStart) + " ms");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        sameClient.close();
-    }
-
-    /**
-     * Each thread creates a client
-     */
     @Test
     public void testStrees00() {
-        final CountDownLatch doneLatch = new CountDownLatch(6);
-        final CountDownLatch startLatch = new CountDownLatch(1);
-        // create thread for test case
-        Configuration config = new Configuration();
-        for (int i = 0; i < 6; i++) {
-            Thread t = new WorkThread(new BeanstalkClient(config), startLatch, doneLatch);
-            t.setName("t-" + i);
-            t.start();
-        }
-
-        try {
-            startLatch.countDown();
-            long anyStart = System.currentTimeMillis();
-            doneLatch.await();
-            long anyEnd = System.currentTimeMillis();
-            System.out.println("this case(single client per thread) take " + (anyEnd - anyStart) + " ms");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @Test
-    public void testStrees01() {
         BeanstalkClient client = new BeanstalkClient();
+        client.useTube("someone");
+        client.watchTube("someone");
+
         long st = System.currentTimeMillis();
 
-        try {
-            client.useTube("streess");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        for (int i = 0; i < 10000; i++) {
-            String data = "this is data [" + i + "]";
-            try {
-                long id = client.putJob(1, 0, 5000, data.getBytes());
-                System.out.println("put job id is " + id + ", index is " + i);
-            } catch (Exception e) {
-                e.printStackTrace();
-                // System.out.println("error = " + e.getMessage());
-            }
-        }
-
-        client.watchTube("streess");
-        for (int i = 0; i < 10000; i++) {
-            Job job = client.reserveJob(1);
-            if (job != null) {
-                client.deleteJob(job.getId());
-                // System.out.println("deleted job is " + job.getId());
-            }
-
+        for (int i = 0; i < 300; i++) {
+            fun(client, i);
         }
 
         long et = System.currentTimeMillis();
-        System.out.println("cost is " + (et - st) + "ms");
+        System.out.println("common case[1thread * 300time=300] takes " + (et - st) + "ms");
     }
 
-    private static class WorkThread extends Thread {
+    /**
+     * Each thread creates a client(30thread * 10time=300)
+     */
+    @Test
+    public void testStrees10() {
+        int tc = 30;
+        final CountDownLatch doneLatch = new CountDownLatch(tc);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        // create thread for test case
+        final Configuration config = new Configuration();
+        for (int i = 0; i < tc; i++) {
+            Thread t = new Thread() {
 
-        private BeanstalkClient client;
+                @Override
+                public void run() {
+                    BeanstalkClient client = new BeanstalkClient(config);
+                    client.useTube("someone");
+                    client.watchTube("someone");
+                    try {
+                        startLatch.await();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
 
-        private CountDownLatch startLatch;
+                    for (int i = 0; i < 10; i++) {
+                        fun(client, i);
+                    }
 
-        private CountDownLatch doneLatch;
+                    doneLatch.countDown();
 
-        /**
-         * @param client
-         * @param startLatch
-         * @param doneLatch
-         */
-        public WorkThread(BeanstalkClient client, CountDownLatch startLatch, CountDownLatch doneLatch) {
-            super();
-            this.client = client;
-            this.startLatch = startLatch;
-            this.doneLatch = doneLatch;
-        }
-
-        /**
-         * {@inheritDoc}
-         * 
-         * @see java.lang.Thread#run()
-         */
-        @Override
-        public void run() {
-            try {
-                startLatch.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                return;
-            }
-            client.useTube(this.getName());
-
-            client.watchTube(this.getName());
-
-            for (int i = 0; i < 100; i++) {
-                try {
-                    bc();
-                } catch (Exception e) {
                 }
-            }
-
-            doneLatch.countDown();
+            };
+            t.setName("t-" + i);
+            t.start();
         }
 
-        /**
-         *
-         */
-        private void bc() {
-            String data = "this is data [" + this.getName() + "]";
+        try {
+            startLatch.countDown();
+            long anyStart = System.currentTimeMillis();
+            doneLatch.await();
+            long anyEnd = System.currentTimeMillis();
+            System.out.println("this case[single client per thread(30thread * 10time=300)] take " + (anyEnd - anyStart)
+                    + " ms");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Each thread creates a client(10thread * 30time=300)
+     */
+    @Test
+    public void testStrees11() {
+        int tc = 10;
+        final CountDownLatch doneLatch = new CountDownLatch(tc);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        // create thread for test case
+        final Configuration config = new Configuration();
+        for (int i = 0; i < tc; i++) {
+            Thread t = new Thread() {
+
+                @Override
+                public void run() {
+                    BeanstalkClient client = new BeanstalkClient(config);
+                    client.useTube("someone");
+                    client.watchTube("someone");
+                    try {
+                        startLatch.await();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+
+                    for (int i = 0; i < 30; i++) {
+                        fun(client, i);
+                    }
+
+                    doneLatch.countDown();
+
+                }
+            };
+            t.setName("t-" + i);
+            t.start();
+        }
+
+        try {
+            startLatch.countDown();
+            long anyStart = System.currentTimeMillis();
+            doneLatch.await();
+            long anyEnd = System.currentTimeMillis();
+            System.out.println("this case[single client per thread(10thread * 30time=300)] take " + (anyEnd - anyStart)
+                    + " ms");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Each thread creates a client(3thread * 100time=300)
+     */
+    @Test
+    public void testStrees12() {
+        int tc = 3;
+        final CountDownLatch doneLatch = new CountDownLatch(tc);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        // create thread for test case
+        final Configuration config = new Configuration();
+        for (int i = 0; i < tc; i++) {
+            Thread t = new Thread() {
+
+                @Override
+                public void run() {
+                    BeanstalkClient client = new BeanstalkClient(config);
+                    client.useTube("someone");
+                    client.watchTube("someone");
+                    try {
+                        startLatch.await();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+
+                    for (int i = 0; i < 100; i++) {
+                        fun(client, i);
+                    }
+
+                    doneLatch.countDown();
+
+                }
+            };
+            t.setName("t-" + i);
+            t.start();
+        }
+
+        try {
+            startLatch.countDown();
+            long anyStart = System.currentTimeMillis();
+            doneLatch.await();
+            long anyEnd = System.currentTimeMillis();
+            System.out.println("this case[single client per thread(3thread * 100time=300)] take " + (anyEnd - anyStart)
+                    + " ms");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Each thread creates a client(1thread * 300time=300)
+     */
+    @Test
+    public void testStrees13() {
+        int tc = 1;
+        final CountDownLatch doneLatch = new CountDownLatch(tc);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        // create thread for test case
+        final Configuration config = new Configuration();
+        for (int i = 0; i < tc; i++) {
+            Thread t = new Thread() {
+
+                @Override
+                public void run() {
+                    BeanstalkClient client = new BeanstalkClient(config);
+                    client.useTube("someone");
+                    client.watchTube("someone");
+                    try {
+                        startLatch.await();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+
+                    for (int i = 0; i < 300; i++) {
+                        fun(client, i);
+                    }
+
+                    doneLatch.countDown();
+
+                }
+            };
+            t.setName("t-" + i);
+            t.start();
+        }
+
+        try {
+            startLatch.countDown();
+            long anyStart = System.currentTimeMillis();
+            doneLatch.await();
+            long anyEnd = System.currentTimeMillis();
+            System.out.println("this case[single client per thread(1thread * 300time=300)] take " + (anyEnd - anyStart)
+                    + " ms");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * same client(30thread * 10time=300)
+     */
+    @Test
+    public void testStrees01() {
+        int tc = 30;
+        final CountDownLatch doneLatch = new CountDownLatch(tc);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        // create thread for test case
+        Configuration config = new Configuration();
+        final BeanstalkClient client = new BeanstalkClient(config);
+        client.useTube("someone");
+        client.watchTube("someone");
+
+        for (int i = 0; i < tc; i++) {
+            Thread t = new Thread() {
+
+                @Override
+                public void run() {
+                    try {
+                        startLatch.await();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+
+                    for (int i = 0; i < 10; i++) {
+                        fun(client, i);
+                    }
+
+                    doneLatch.countDown();
+
+                }
+            };
+            t.setName("t-" + i);
+            t.start();
+        }
+
+        try {
+            startLatch.countDown();
+            long anyStart = System.currentTimeMillis();
+            doneLatch.await();
+            long anyEnd = System.currentTimeMillis();
+            System.out.println("this case[same client(30thread * 10time=300)] takes " + (anyEnd - anyStart) + " ms");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * same client(30thread * 10time=300)
+     */
+    @Test
+    public void testStrees02() {
+        int tc = 30;
+        final CountDownLatch doneLatch = new CountDownLatch(tc);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        // create thread for test case
+        Configuration config = new Configuration();
+        final BeanstalkClient client = new BeanstalkClient(config);
+        client.useTube("someone");
+        client.watchTube("someone");
+
+        for (int i = 0; i < tc; i++) {
+            Thread t = new Thread() {
+
+                @Override
+                public void run() {
+                    try {
+                        startLatch.await();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+
+                    for (int i = 0; i < 10; i++) {
+                        fun(client, i);
+                    }
+
+                    doneLatch.countDown();
+
+                }
+            };
+            t.setName("t-" + i);
+            t.start();
+        }
+
+        try {
+            startLatch.countDown();
+            long anyStart = System.currentTimeMillis();
+            doneLatch.await();
+            long anyEnd = System.currentTimeMillis();
+            System.out.println("this case[same client(30thread * 10time=300)] takes " + (anyEnd - anyStart) + " ms");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * same client(10thread * 30time=300)
+     */
+    @Test
+    public void testStrees03() {
+        int tc = 10;
+        final CountDownLatch doneLatch = new CountDownLatch(tc);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        // create thread for test case
+        Configuration config = new Configuration();
+        final BeanstalkClient client = new BeanstalkClient(config);
+        client.useTube("someone");
+        client.watchTube("someone");
+
+        for (int i = 0; i < tc; i++) {
+            Thread t = new Thread() {
+
+                @Override
+                public void run() {
+                    try {
+                        startLatch.await();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+
+                    for (int i = 0; i < 30; i++) {
+                        fun(client, i);
+                    }
+
+                    doneLatch.countDown();
+
+                }
+            };
+            t.setName("t-" + i);
+            t.start();
+        }
+
+        try {
+            startLatch.countDown();
+            long anyStart = System.currentTimeMillis();
+            doneLatch.await();
+            long anyEnd = System.currentTimeMillis();
+            System.out.println("this case[same client(10thread * 30time=300)] takes " + (anyEnd - anyStart) + " ms");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * same client(1thread * 300time=300)
+     */
+    @Test
+    public void testStrees04() {
+        int tc = 1;
+        final CountDownLatch doneLatch = new CountDownLatch(tc);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        // create thread for test case
+        Configuration config = new Configuration();
+        final BeanstalkClient client = new BeanstalkClient(config);
+        client.useTube("someone");
+        client.watchTube("someone");
+
+        for (int i = 0; i < tc; i++) {
+            Thread t = new Thread() {
+
+                @Override
+                public void run() {
+                    try {
+                        startLatch.await();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+
+                    for (int i = 0; i < 300; i++) {
+                        fun(client, i);
+                    }
+
+                    doneLatch.countDown();
+
+                }
+            };
+            t.setName("t-" + i);
+            t.start();
+        }
+
+        try {
+            startLatch.countDown();
+            long anyStart = System.currentTimeMillis();
+            doneLatch.await();
+            long anyEnd = System.currentTimeMillis();
+            System.out.println("this case[same client(1thread * 300time=300)] takes " + (anyEnd - anyStart) + " ms");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * same client(60thread * 5time=300)
+     */
+    @Test
+    public void testStrees05() {
+        int tc = 60;
+        final CountDownLatch doneLatch = new CountDownLatch(tc);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        // create thread for test case
+        Configuration config = new Configuration();
+        final BeanstalkClient client = new BeanstalkClient(config);
+        client.useTube("someone");
+        client.watchTube("someone");
+
+        for (int i = 0; i < tc; i++) {
+            Thread t = new Thread() {
+
+                @Override
+                public void run() {
+                    try {
+                        startLatch.await();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+
+                    for (int i = 0; i < 5; i++) {
+                        fun(client, i);
+                    }
+
+                    doneLatch.countDown();
+
+                }
+            };
+            t.setName("t-" + i);
+            t.start();
+        }
+
+        try {
+            startLatch.countDown();
+            long anyStart = System.currentTimeMillis();
+            doneLatch.await();
+            long anyEnd = System.currentTimeMillis();
+            System.out.println("this case[same client(60thread * 5time=300)] takes " + (anyEnd - anyStart) + " ms");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * same client(150thread * 2time=300)
+     */
+    @Test
+    public void testStrees06() {
+        int tc = 150;
+        final CountDownLatch doneLatch = new CountDownLatch(tc);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        // create thread for test case
+        Configuration config = new Configuration();
+        final BeanstalkClient client = new BeanstalkClient(config);
+        client.useTube("someone");
+        client.watchTube("someone");
+
+        for (int i = 0; i < tc; i++) {
+            Thread t = new Thread() {
+
+                @Override
+                public void run() {
+                    try {
+                        startLatch.await();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+
+                    for (int i = 0; i < 2; i++) {
+                        fun(client, i);
+                    }
+
+                    doneLatch.countDown();
+
+                }
+            };
+            t.setName("t-" + i);
+            t.start();
+        }
+
+        try {
+            startLatch.countDown();
+            long anyStart = System.currentTimeMillis();
+            doneLatch.await();
+            long anyEnd = System.currentTimeMillis();
+            System.out.println("this case[same client(150thread * 2time=300)] takes " + (anyEnd - anyStart) + " ms");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * same client(300thread * 1time=300)
+     */
+    @Test
+    public void testStrees07() {
+        int tc = 300;
+        final CountDownLatch doneLatch = new CountDownLatch(tc);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        // create thread for test case
+        Configuration config = new Configuration();
+        final BeanstalkClient client = new BeanstalkClient(config);
+        client.useTube("someone");
+        client.watchTube("someone");
+
+        for (int i = 0; i < tc; i++) {
+            Thread t = new Thread() {
+
+                @Override
+                public void run() {
+                    try {
+                        startLatch.await();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+
+                    for (int i = 0; i < 1; i++) {
+                        fun(client, i);
+                    }
+
+                    doneLatch.countDown();
+
+                }
+
+            };
+            t.setName("t-" + i);
+            t.start();
+        }
+
+        try {
+            startLatch.countDown();
+            long anyStart = System.currentTimeMillis();
+            doneLatch.await();
+            long anyEnd = System.currentTimeMillis();
+            System.out.println("this case[same client(300thread * 1time=300)] takes " + (anyEnd - anyStart) + " ms");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * @param client
+     * @param i
+     */
+    static void fun(final BeanstalkClient client, int i) {
+        try {
+            String data = "this is data [" + i + "]";
             client.putJob(1, 0, 5000, data.getBytes());
 
             Job job = client.reserveJob(1);
@@ -177,8 +596,10 @@ public class BeanstalkClientStressTest {
             client.buryJob(job.getId(), 2);
 
             client.deleteJob(job.getId());
-        }
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

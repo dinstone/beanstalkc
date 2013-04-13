@@ -20,7 +20,6 @@ import java.util.Queue;
 
 import org.apache.mina.core.session.IoSession;
 
-import com.dinstone.beanstalkc.Configuration;
 import com.dinstone.beanstalkc.internal.operation.Operation;
 
 public class OperationConnection implements Connection {
@@ -29,17 +28,10 @@ public class OperationConnection implements Connection {
 
     private IoSession ioSession;
 
-    private Configuration config;
+    private final Connector connector;
 
-    private Connector socketConnector;
-
-    /**
-     * @param config2
-     * @param cValue
-     */
-    public OperationConnection(Configuration config, Connector socketConnector) {
-        this.config = config;
-        this.socketConnector = socketConnector;
+    public OperationConnection(Connector connector) {
+        this.connector = connector;
     }
 
     @Override
@@ -58,7 +50,7 @@ public class OperationConnection implements Connection {
         }
 
         if (!isConnected()) {
-            ioSession = socketConnector.createSession();
+            ioSession = connector.createSession();
             SessionUtil.setConnection(ioSession, this);
         }
     }
@@ -88,24 +80,6 @@ public class OperationConnection implements Connection {
 
     private boolean isConnected() {
         return ioSession != null && ioSession.isConnected();
-    }
-
-    /**
-     * @return
-     */
-    @Override
-    public Configuration getConfiguration() {
-        return config;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see com.dinstone.beanstalkc.internal.Connection#isClosed()
-     */
-    @Override
-    public boolean isClosed() {
-        return closed;
     }
 
 }

@@ -44,6 +44,8 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
 
     private long optionTimeout;
 
+    private Configuration config;
+
     public BeanstalkClient() {
         this(new Configuration());
     }
@@ -55,6 +57,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         if (config == null) {
             throw new IllegalArgumentException("config is null");
         }
+        this.config = config;
         this.optionTimeout = config.getLong(Configuration.OPTION_TIMEOUT, 1);
 
         ConnectionFactory factory = ConnectionFactory.getInstance();
@@ -140,7 +143,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         connection.close();
 
         ConnectionFactory factory = ConnectionFactory.getInstance();
-        factory.releaseConnection(connection.getConfiguration());
+        factory.releaseConnection(config);
     }
 
     private boolean getBoolean(OperationFuture<Boolean> future) {

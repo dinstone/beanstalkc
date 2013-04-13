@@ -44,7 +44,7 @@ public class ConnectionFactory {
                 cachedConnectors.put(ckey, connector);
             }
             connector.incrementRefCount();
-            return new OperationConnection(config, connector);
+            return new OperationConnection(connector);
         }
     }
 

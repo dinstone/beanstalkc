@@ -16,7 +16,6 @@
 
 package com.dinstone.beanstalkc.internal;
 
-import com.dinstone.beanstalkc.Configuration;
 import com.dinstone.beanstalkc.internal.operation.Operation;
 
 /**
@@ -34,20 +33,6 @@ public interface Connection {
      * @return
      */
     public <T> OperationFuture<T> handle(Operation<T> operation);
-
-    /**
-     * get this connection's configuration.
-     * 
-     * @return
-     */
-    public Configuration getConfiguration();
-
-    /**
-     * whether the current connection status is closed.
-     * 
-     * @return
-     */
-    public boolean isClosed();
 
     /**
      * close the connection,then that status is closed.

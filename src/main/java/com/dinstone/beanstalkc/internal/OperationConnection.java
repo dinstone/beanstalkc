@@ -30,8 +30,11 @@ public class OperationConnection implements Connection {
 
     private final Connector connector;
 
-    public OperationConnection(Connector connector) {
+    private final ConnectionInitializer initializer;
+
+    public OperationConnection(Connector connector, ConnectionInitializer initializer) {
         this.connector = connector;
+        this.initializer = initializer;
     }
 
     @Override
@@ -42,17 +45,6 @@ public class OperationConnection implements Connection {
         ioSession.write(operation);
 
         return operation.getOperationFuture();
-    }
-
-    private void connect() {
-        if (closed) {
-            throw new RuntimeException("connection is closed");
-        }
-
-        if (!isConnected()) {
-            ioSession = connector.createSession();
-            SessionUtil.setConnection(ioSession, this);
-        }
     }
 
     @Override
@@ -76,6 +68,21 @@ public class OperationConnection implements Connection {
             ioSession.close(true);
         }
         ioSession = null;
+    }
+
+    private void connect() {
+        if (closed) {
+            throw new RuntimeException("connection is closed");
+        }
+    
+        if (!isConnected()) {
+            ioSession = connector.createSession();
+            SessionUtil.setConnection(ioSession, this);
+    
+            if (initializer != null) {
+                initializer.initConnection(this);
+            }
+        }
     }
 
     private boolean isConnected() {

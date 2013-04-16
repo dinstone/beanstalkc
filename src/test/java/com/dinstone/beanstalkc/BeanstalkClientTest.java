@@ -28,6 +28,8 @@ public class BeanstalkClientTest {
     @Before
     public void setUp() throws Exception {
         client = new BeanstalkClient();
+        client.useTube("br");
+        client.watchTube("br");
     }
 
     @After
@@ -37,7 +39,7 @@ public class BeanstalkClientTest {
 
     @Test
     public void testUseTube() {
-        boolean f = client.useTube("batchflow/request");
+        boolean f = client.useTube("br");
         Assert.assertTrue(f);
     }
 

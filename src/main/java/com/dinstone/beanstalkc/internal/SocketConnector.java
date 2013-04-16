@@ -62,6 +62,7 @@ public class SocketConnector implements Connector {
         // create connector
         ioConnector = new NioSocketConnector();
         SocketSessionConfig sessionConfig = ioConnector.getSessionConfig();
+        LOG.debug("KeepAlive is {}", sessionConfig.isKeepAlive());
         LOG.debug("ReadBufferSize is {}", sessionConfig.getReadBufferSize());
         LOG.debug("SendBufferSize is {}", sessionConfig.getSendBufferSize());
 

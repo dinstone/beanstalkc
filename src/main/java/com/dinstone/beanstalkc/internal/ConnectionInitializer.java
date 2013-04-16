@@ -16,32 +16,14 @@
 
 package com.dinstone.beanstalkc.internal;
 
-import com.dinstone.beanstalkc.internal.operation.Operation;
-
 /**
- * connect the beanstalkd service and asynchronous handle operation.
- * 
  * @author guojf
- * @version 1.0.0.2013-4-10
+ * @version 1.0.0.2013-4-15
  */
-public interface Connection {
+public interface ConnectionInitializer {
 
     /**
-     * asynchronous handle operation.
-     * 
-     * @param operation
-     * @return
+     * @param connection
      */
-    public <T> OperationFuture<T> handle(Operation<T> operation);
-
-    /**
-     * close the connection,then that status is closed.
-     */
-    public void close();
-
-    /**
-     * release to the operation of the current connection.
-     */
-    public void destroy();
-
+    public void initConnection(Connection connection);
 }

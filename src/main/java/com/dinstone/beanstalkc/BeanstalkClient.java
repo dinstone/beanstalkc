@@ -38,7 +38,7 @@ import com.dinstone.beanstalkc.internal.operation.WatchOperation;
  * @author guojf
  * @version 1.0.0.2013-4-11
  */
-public class BeanstalkClient implements JobProducer, JobConsumer {
+public class BeanstalkClient implements IJobProducer, IJobConsumer {
 
     private Connection connection;
 
@@ -64,19 +64,35 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         this.connection = factory.createConnection(config);
     }
 
-    @Override
+    /**
+     * The "use" command is for producers. Subsequent put commands will put jobs
+     * into the tube specified by this command. If no use command has been
+     * issued, jobs will be put into the tube named "default".
+     * 
+     * @param tube
+     *        is a name at most 200 bytes. It specifies the tube to use. If the
+     *        tube does not exist, it will be created.
+     * @return
+     */
     public boolean useTube(String tube) {
         UseOperation operation = new UseOperation(tube);
         return getBoolean(connection.handle(operation));
     }
 
-    @Override
+    /**
+     * The "watch" command adds the named tube to the watch list for the current
+     * connection. A reserve command will take a job from any of the tubes in
+     * the watch list. For each new connection, the watch list initially
+     * consists of one tube, named "default".
+     * 
+     * @param tube
+     * @return
+     */
     public boolean watchTube(String tube) {
         WatchOperation operation = new WatchOperation(tube);
         return getBoolean(connection.handle(operation));
     }
 
-    @Override
     public boolean ignoreTube(String tube) {
         IgnoreOperation operation = new IgnoreOperation(tube);
         return getBoolean(connection.handle(operation));
@@ -85,7 +101,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
     /**
      * {@inheritDoc}
      * 
-     * @see com.dinstone.beanstalkc.JobProducer#putJob(int, int, int, byte[])
+     * @see com.dinstone.beanstalkc.IJobProducer#putJob(int, int, int, byte[])
      */
     @Override
     public long putJob(int priority, int delay, int ttr, byte[] data) {
@@ -104,7 +120,17 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         return getBoolean(connection.handle(operation));
     }
 
-    @Override
+    /**
+     * The "touch" command allows a worker to request more time to work on a
+     * job. This is useful for jobs that potentially take a long time, but you
+     * still want the benefits of a TTR pulling a job away from an unresponsive
+     * worker. A worker may periodically tell the server that it's still alive
+     * and processing a job (e.g. it may do this on DEADLINE_SOON).
+     * 
+     * @param id
+     *        is the ID of a job reserved by the current connection.
+     * @return
+     */
     public boolean touchJob(long id) {
         TouchOperation operation = new TouchOperation(id);
         return getBoolean(connection.handle(operation));

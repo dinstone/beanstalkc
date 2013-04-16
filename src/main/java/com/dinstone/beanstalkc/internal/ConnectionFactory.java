@@ -36,6 +36,10 @@ public class ConnectionFactory {
     }
 
     public Connection createConnection(Configuration config) {
+        return createConnection(config, null);
+    }
+
+    public Connection createConnection(Configuration config, ConnectionInitializer initer) {
         ConnectorKey ckey = new ConnectorKey(config);
         synchronized (cachedConnectors) {
             SocketConnector connector = cachedConnectors.get(ckey);
@@ -44,7 +48,7 @@ public class ConnectionFactory {
                 cachedConnectors.put(ckey, connector);
             }
             connector.incrementRefCount();
-            return new OperationConnection(connector);
+            return new OperationConnection(connector, initer);
         }
     }
 

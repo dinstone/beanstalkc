@@ -18,47 +18,73 @@ package com.dinstone.beanstalkc;
 
 import java.util.concurrent.TimeUnit;
 
-public interface JobProducer {
+import com.dinstone.beanstalkc.internal.Connection;
+import com.dinstone.beanstalkc.internal.ConnectionFactory;
+import com.dinstone.beanstalkc.internal.ConnectionInitializer;
+import com.dinstone.beanstalkc.internal.OperationFuture;
+import com.dinstone.beanstalkc.internal.operation.PutOperation;
+import com.dinstone.beanstalkc.internal.operation.UseOperation;
+
+/**
+ * @author guojf
+ * @version 1.0.0.2013-4-15
+ */
+public class JobProducer implements IJobProducer {
+
+    private Configuration config;
+
+    private long optionTimeout;
+
+    private Connection connection;
+
+    public JobProducer(final Configuration config, final String useTube) {
+        if (config == null) {
+            throw new IllegalArgumentException("config is null");
+        }
+        this.config = config;
+        this.optionTimeout = config.getLong(Configuration.OPTION_TIMEOUT, 3);
+
+        this.connection = ConnectionFactory.getInstance().createConnection(config, new ConnectionInitializer() {
+
+            @Override
+            public void initConnection(Connection connection) {
+                if (useTube != null) {
+                    try {
+                        connection.handle(new UseOperation(useTube)).get();
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        });
+    }
 
     /**
-     * The "use" command is for producers. Subsequent put commands will put jobs
-     * into the tube specified by this command. If no use command has been
-     * issued, jobs will be put into the tube named "default".
+     * {@inheritDoc}
      * 
-     * @param tube
-     *        is a name at most 200 bytes. It specifies the tube to use. If the
-     *        tube does not exist, it will be created.
-     * @return
+     * @see com.dinstone.beanstalkc.IJobProducer#putJob(int, int, int, byte[])
      */
-    public boolean useTube(String tube);
+    @Override
+    public long putJob(int priority, int delay, int ttr, byte[] data) {
+        PutOperation operation = new PutOperation(priority, delay, ttr, data);
+        OperationFuture<Long> future = connection.handle(operation);
+        try {
+            return future.get(optionTimeout, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
-     * It inserts a job into the client's currently used tube.
+     * {@inheritDoc}
      * 
-     * @param priority
-     *        an integer < 2**32. Jobs with smaller priority values will be
-     *        scheduled before jobs with larger priorities. The most urgent
-     *        priority is 0; the least urgent priority is 4,294,967,295.
-     * @param delay
-     *        {@link TimeUnit.SECONDS}
-     * @param ttr
-     *        {@link TimeUnit.SECONDS} time to run -- is an integer number of
-     *        seconds to allow a worker to run this job. This time is counted
-     *        from the moment a worker reserves this job. If the worker does not
-     *        delete, release, or bury the job within <ttr> seconds, the job
-     *        will time out and the server will release the job. The minimum ttr
-     *        is 1. If the client sends 0, the server will silently increase the
-     *        ttr to 1.
-     * @param data
-     *        the job body,that length is an integer indicating the size of the
-     *        job body, not including the trailing "\r\n". This value must be
-     *        less than max-job-size (default: 2**16).
-     * @return the integer id of the new job
+     * @see com.dinstone.beanstalkc.IJobProducer#close()
      */
-    public long putJob(int priority, int delay, int ttr, byte[] data);
+    @Override
+    public void close() {
+        connection.close();
 
-    /**
-     * close producer.
-     */
-    public void close();
+        ConnectionFactory factory = ConnectionFactory.getInstance();
+        factory.releaseConnection(config);
+    }
+
 }

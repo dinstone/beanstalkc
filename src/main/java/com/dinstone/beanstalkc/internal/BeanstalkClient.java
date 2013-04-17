@@ -69,6 +69,10 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         this.connection = factory.createConnection(config, initer);
     }
 
+    // ************************************************************************
+    // Consumer methods
+    // ************************************************************************
+
     /**
      * The "use" command is for producers. Subsequent put commands will put jobs
      * into the tube specified by this command. If no use command has been
@@ -81,25 +85,6 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
      */
     public boolean useTube(String tube) {
         UseOperation operation = new UseOperation(tube);
-        return getBoolean(connection.handle(operation));
-    }
-
-    /**
-     * The "watch" command adds the named tube to the watch list for the current
-     * connection. A reserve command will take a job from any of the tubes in
-     * the watch list. For each new connection, the watch list initially
-     * consists of one tube, named "default".
-     * 
-     * @param tube
-     * @return
-     */
-    public boolean watchTube(String tube) {
-        WatchOperation operation = new WatchOperation(tube);
-        return getBoolean(connection.handle(operation));
-    }
-
-    public boolean ignoreTube(String tube) {
-        IgnoreOperation operation = new IgnoreOperation(tube);
         return getBoolean(connection.handle(operation));
     }
 
@@ -117,6 +102,29 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    // ************************************************************************
+    // Consumer methods
+    // ************************************************************************
+
+    public boolean ignoreTube(String tube) {
+        IgnoreOperation operation = new IgnoreOperation(tube);
+        return getBoolean(connection.handle(operation));
+    }
+
+    /**
+     * The "watch" command adds the named tube to the watch list for the current
+     * connection. A reserve command will take a job from any of the tubes in
+     * the watch list. For each new connection, the watch list initially
+     * consists of one tube, named "default".
+     * 
+     * @param tube
+     * @return
+     */
+    public boolean watchTube(String tube) {
+        WatchOperation operation = new WatchOperation(tube);
+        return getBoolean(connection.handle(operation));
     }
 
     @Override
@@ -165,17 +173,17 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         return getBoolean(connection.handle(operation));
     }
 
-    public void quit() {
-        QuitOperation operation = new QuitOperation();
-        getBoolean(connection.handle(operation));
-    }
-
     @Override
     public void close() {
         connection.close();
 
         ConnectionFactory factory = ConnectionFactory.getInstance();
         factory.releaseConnection(config);
+    }
+
+    public void quit() {
+        QuitOperation operation = new QuitOperation();
+        getBoolean(connection.handle(operation));
     }
 
     private boolean getBoolean(OperationFuture<Boolean> future) {

@@ -288,12 +288,40 @@ public final class Configuration {
         set(name, Boolean.toString(value));
     }
 
+    /**
+     * get remote host
+     * 
+     * @return
+     */
     public String getRemoteHost() {
         return get(REMOTE_HOST);
     }
 
+    /**
+     * set remote host
+     * 
+     * @param host
+     */
+    public void setRemoteHost(String host) {
+        set(REMOTE_HOST, host);
+    }
+
+    /**
+     * get remote port
+     * 
+     * @return
+     */
     public int getRemotePort() {
         return getInt(REMOTE_PORT, 11300);
+    }
+
+    /**
+     * set remote port
+     * 
+     * @param port
+     */
+    public void setRemotePort(int port) {
+        setInt(REMOTE_PORT, port);
     }
 
 }

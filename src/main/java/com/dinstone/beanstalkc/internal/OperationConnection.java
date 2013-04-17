@@ -74,11 +74,11 @@ public class OperationConnection implements Connection {
         if (closed) {
             throw new RuntimeException("connection is closed");
         }
-    
+
         if (!isConnected()) {
             ioSession = connector.createSession();
             SessionUtil.setConnection(ioSession, this);
-    
+
             if (initializer != null) {
                 initializer.initConnection(this);
             }

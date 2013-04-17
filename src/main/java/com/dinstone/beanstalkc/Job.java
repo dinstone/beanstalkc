@@ -16,10 +16,18 @@
 
 package com.dinstone.beanstalkc;
 
+/**
+ * beanstalk job entity.
+ * 
+ * @author guojf
+ * @version 1.0.0.2013-4-17
+ */
 public class Job {
 
+    /** job id */
     private long id;
 
+    /** job body */
     private byte[] data;
 
     /**

@@ -14,13 +14,14 @@
  * the License.
  */
 
-package com.dinstone.beanstalkc;
+package com.dinstone.beanstalkc.internal;
 
 import java.util.concurrent.TimeUnit;
 
-import com.dinstone.beanstalkc.internal.Connection;
-import com.dinstone.beanstalkc.internal.ConnectionFactory;
-import com.dinstone.beanstalkc.internal.OperationFuture;
+import com.dinstone.beanstalkc.Configuration;
+import com.dinstone.beanstalkc.Job;
+import com.dinstone.beanstalkc.JobConsumer;
+import com.dinstone.beanstalkc.JobProducer;
 import com.dinstone.beanstalkc.internal.operation.BuryOperation;
 import com.dinstone.beanstalkc.internal.operation.DeleteOperation;
 import com.dinstone.beanstalkc.internal.operation.IgnoreOperation;
@@ -38,7 +39,7 @@ import com.dinstone.beanstalkc.internal.operation.WatchOperation;
  * @author guojf
  * @version 1.0.0.2013-4-11
  */
-public class BeanstalkClient implements IJobProducer, IJobConsumer {
+public class BeanstalkClient implements JobProducer, JobConsumer {
 
     private Connection connection;
 
@@ -46,14 +47,18 @@ public class BeanstalkClient implements IJobProducer, IJobConsumer {
 
     private Configuration config;
 
-    public BeanstalkClient() {
-        this(new Configuration());
-    }
-
     /**
      * @param config
      */
     public BeanstalkClient(Configuration config) {
+        this(config, null);
+    }
+
+    /**
+     * @param config
+     * @param initer
+     */
+    public BeanstalkClient(Configuration config, ConnectionInitializer initer) {
         if (config == null) {
             throw new IllegalArgumentException("config is null");
         }
@@ -61,7 +66,7 @@ public class BeanstalkClient implements IJobProducer, IJobConsumer {
         this.optionTimeout = config.getLong(Configuration.OPTION_TIMEOUT, 1);
 
         ConnectionFactory factory = ConnectionFactory.getInstance();
-        this.connection = factory.createConnection(config);
+        this.connection = factory.createConnection(config, initer);
     }
 
     /**
@@ -101,7 +106,7 @@ public class BeanstalkClient implements IJobProducer, IJobConsumer {
     /**
      * {@inheritDoc}
      * 
-     * @see com.dinstone.beanstalkc.IJobProducer#putJob(int, int, int, byte[])
+     * @see com.dinstone.beanstalkc.JobProducer#putJob(int, int, int, byte[])
      */
     @Override
     public long putJob(int priority, int delay, int ttr, byte[] data) {
@@ -131,6 +136,7 @@ public class BeanstalkClient implements IJobProducer, IJobConsumer {
      *        is the ID of a job reserved by the current connection.
      * @return
      */
+    @Override
     public boolean touchJob(long id) {
         TouchOperation operation = new TouchOperation(id);
         return getBoolean(connection.handle(operation));

@@ -28,6 +28,8 @@ import com.dinstone.beanstalkc.Configuration;
  */
 public class ConnectorKey {
 
+    private static final String[] CONNECTION_PROPERTIES = { Configuration.REMOTE_HOST, Configuration.REMOTE_PORT };
+
     private Map<String, String> properties;
 
     /**
@@ -36,9 +38,14 @@ public class ConnectorKey {
     public ConnectorKey(Configuration config) {
         Map<String, String> m = new HashMap<String, String>();
         if (config != null) {
-            m.put(Configuration.REMOTE_HOST, config.getRemoteHost());
-            m.put(Configuration.REMOTE_PORT, config.getRemoteHost());
+            for (String property : CONNECTION_PROPERTIES) {
+                String value = config.get(property);
+                if (value != null) {
+                    m.put(property, value);
+                }
+            }
         }
+
         this.properties = Collections.unmodifiableMap(m);
     }
 
@@ -51,13 +58,11 @@ public class ConnectorKey {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        String value = properties.get(Configuration.REMOTE_HOST);
-        if (value != null) {
-            result = prime * result + value.hashCode();
-        }
-        value = properties.get(Configuration.REMOTE_PORT);
-        if (value != null) {
-            result = prime * result + value.hashCode();
+        for (String property : CONNECTION_PROPERTIES) {
+            String value = properties.get(property);
+            if (value != null) {
+                result = prime * result + value.hashCode();
+            }
         }
         return result;
     }
@@ -86,16 +91,15 @@ public class ConnectorKey {
         } else if (other.properties == null) {
             return false;
         } else {
-            String thisValue = this.properties.get(Configuration.REMOTE_HOST);
-            String thatValue = other.properties.get(Configuration.REMOTE_HOST);
-            if (thisValue == null || !thisValue.equals(thatValue)) {
-                return false;
-            }
-
-            thisValue = this.properties.get(Configuration.REMOTE_PORT);
-            thatValue = other.properties.get(Configuration.REMOTE_PORT);
-            if (thisValue == null || !thisValue.equals(thatValue)) {
-                return false;
+            for (String property : CONNECTION_PROPERTIES) {
+                String thisValue = this.properties.get(property);
+                String thatValue = other.properties.get(property);
+                if (thisValue == thatValue) {
+                    continue;
+                }
+                if (thisValue == null || !thisValue.equals(thatValue)) {
+                    return false;
+                }
             }
         }
 
@@ -109,7 +113,7 @@ public class ConnectorKey {
      */
     @Override
     public String toString() {
-        return "ConnectorKey [properties=" + properties + "]";
+        return "ConnectorKey{properties=" + properties + "}";
     }
 
 }

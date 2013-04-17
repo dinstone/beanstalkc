@@ -16,140 +16,90 @@
 
 package com.dinstone.beanstalkc;
 
-import java.util.concurrent.TimeUnit;
-
-import com.dinstone.beanstalkc.internal.Connection;
-import com.dinstone.beanstalkc.internal.ConnectionFactory;
-import com.dinstone.beanstalkc.internal.ConnectionInitializer;
-import com.dinstone.beanstalkc.internal.OperationFuture;
-import com.dinstone.beanstalkc.internal.operation.BuryOperation;
-import com.dinstone.beanstalkc.internal.operation.DeleteOperation;
-import com.dinstone.beanstalkc.internal.operation.IgnoreOperation;
-import com.dinstone.beanstalkc.internal.operation.ReleaseOperation;
-import com.dinstone.beanstalkc.internal.operation.ReserveOperation;
-import com.dinstone.beanstalkc.internal.operation.TouchOperation;
-import com.dinstone.beanstalkc.internal.operation.WatchOperation;
-
 /**
+ * {@link JobConsumer} is a kind of client beanstalk, that is responsible for
+ * the consumer job.
+ * 
  * @author guojf
  * @version 1.0.0.2013-4-15
  */
-public class JobConsumer implements IJobConsumer {
-
-    private final boolean ignoreDefault;
-
-    private final long optionTimeout;
-
-    private Connection connection;
-
-    private Configuration config;
-
-    public JobConsumer(final Configuration config, final String... watchTubes) {
-        if (config == null) {
-            throw new IllegalArgumentException("config is null");
-        }
-        this.config = config;
-        this.ignoreDefault = config.getBoolean("IgnoreDefaultTube", true);
-        this.optionTimeout = config.getLong(Configuration.OPTION_TIMEOUT, 3);
-
-        this.connection = ConnectionFactory.getInstance().createConnection(config, new ConnectionInitializer() {
-
-            @Override
-            public void initConnection(Connection connection) {
-                if (watchTubes != null && watchTubes.length > 0) {
-                    for (int i = 0; i < watchTubes.length; i++) {
-                        try {
-                            connection.handle(new WatchOperation(watchTubes[i])).get();
-                        } catch (Exception e) {
-                        }
-                    }
-                }
-
-                if (ignoreDefault) {
-                    try {
-                        connection.handle(new IgnoreOperation("default")).get();
-                    } catch (Exception e) {
-                    }
-                }
-            }
-        });
-    }
+public interface JobConsumer {
 
     /**
-     * {@inheritDoc}
+     * beanstalkd will wait to send a response until one becomes available. Once
+     * a job is reserved for the client, the client has limited time to run
+     * (TTR) the job before the job times out. When the job times out, the
+     * server will put the job back into the ready queue. Both the TTR and the
+     * actual time left can be found in response to the stats-job command. A
+     * timeout value of 0 will cause the server to immediately return either a
+     * response or TIMED_OUT. A positive value of timeout will limit the amount
+     * of time the client will block on the reserve request until a job becomes
+     * available.
      * 
-     * @see com.dinstone.beanstalkc.IJobConsumer#reserveJob(long)
+     * @param timeout
+     *        if timeout>0,then with reserve-with-timeout command.
+     * @return
      */
-    @Override
-    public Job reserveJob(long timeout) {
-        ReserveOperation operation = new ReserveOperation(timeout);
-        OperationFuture<Job> future = connection.handle(operation);
-        try {
-            return future.get(optionTimeout, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+    public Job reserveJob(long timeout);
 
     /**
-     * {@inheritDoc}
+     * The delete command removes a job from the server entirely. It is normally
+     * used by the client when the job has successfully run to completion. A
+     * client can delete jobs that it has reserved, ready jobs, delayed jobs,
+     * and jobs that are buried.
      * 
-     * @see com.dinstone.beanstalkc.IJobConsumer#deleteJob(long)
+     * @param id
+     *        is the job id to delete.
+     * @return
      */
-    @Override
-    public boolean deleteJob(long id) {
-        return getBoolean(connection.handle(new DeleteOperation(id)));
-    }
+    public boolean deleteJob(long id);
 
     /**
-     * {@inheritDoc}
+     * The release command puts a reserved job back into the ready queue (and
+     * marks its state as "ready") to be run by any client. It is normally used
+     * when the job fails because of a transitory error.
      * 
-     * @see com.dinstone.beanstalkc.IJobConsumer#releaseJob(long, int, int)
+     * @param id
+     *        is the job id to release.
+     * @param priority
+     *        is a new priority to assign to the job.
+     * @param delay
+     *        is an integer number of seconds to wait before putting the job in
+     *        the ready queue. The job will be in the "delayed" state during
+     *        this time.
+     * @return
      */
-    @Override
-    public boolean releaseJob(long id, int priority, int delay) {
-        return getBoolean(connection.handle(new ReleaseOperation(id, priority, delay)));
-    }
+    public boolean releaseJob(long id, int priority, int delay);
 
     /**
-     * {@inheritDoc}
+     * The bury command puts a job into the "buried" state. Buried jobs are put
+     * into a FIFO linked list and will not be touched by the server again until
+     * a client kicks them with the "kick" command.
      * 
-     * @see com.dinstone.beanstalkc.IJobConsumer#buryJob(long, int)
+     * @param id
+     *        is the job id to bury.
+     * @param priority
+     *        is a new priority to assign to the job.
+     * @return
      */
-    @Override
-    public boolean buryJob(long id, int priority) {
-        return getBoolean(connection.handle(new BuryOperation(id, priority)));
-    }
+    public boolean buryJob(long id, int priority);
 
     /**
-     * {@inheritDoc}
+     * The "touch" command allows a worker to request more time to work on a
+     * job. This is useful for jobs that potentially take a long time, but you
+     * still want the benefits of a TTR pulling a job away from an unresponsive
+     * worker. A worker may periodically tell the server that it's still alive
+     * and processing a job (e.g. it may do this on DEADLINE_SOON).
      * 
-     * @see com.dinstone.beanstalkc.IJobConsumer#touchJob(long)
+     * @param id
+     *        is the ID of a job reserved by the current connection.
+     * @return
      */
-    @Override
-    public boolean touchJob(long id) {
-        return getBoolean(connection.handle(new TouchOperation(id)));
-    }
+    public boolean touchJob(long id);
 
     /**
-     * {@inheritDoc}
-     * 
-     * @see com.dinstone.beanstalkc.IJobConsumer#close()
+     * close the current connection and release resources. that's status is
+     * closed, and is no longer available.
      */
-    @Override
-    public void close() {
-        connection.close();
-
-        ConnectionFactory factory = ConnectionFactory.getInstance();
-        factory.releaseConnection(config);
-    }
-
-    private boolean getBoolean(OperationFuture<Boolean> future) {
-        try {
-            return future.get(optionTimeout, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
+    public void close();
 }

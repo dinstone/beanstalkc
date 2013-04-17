@@ -38,8 +38,9 @@ public class JobProducerConsumerTest {
     @Before
     public void setUp() throws Exception {
         Configuration config = new Configuration();
-        producer = new JobProducer(config, "pctube");
-        consumer = new JobConsumer(config, "pctube");
+        BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
+        producer = factory.createJobProducer("pctube");
+        consumer = factory.createJobConsumer("pctube");
     }
 
     /**
@@ -84,7 +85,7 @@ public class JobProducerConsumerTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         final Configuration config = new Configuration();
-
+        final BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         // create thread for test case
         for (int i = 0; i < tc; i++) {
             Thread t = new Thread() {
@@ -97,7 +98,7 @@ public class JobProducerConsumerTest {
                         return;
                     }
 
-                    JobProducer producer = new JobProducer(config, "pctube");
+                    JobProducer producer = factory.createJobProducer("pctube");
 
                     for (int i = 0; i < 1; i++) {
                         funProduce(producer, i);
@@ -132,7 +133,7 @@ public class JobProducerConsumerTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         final Configuration config = new Configuration();
-
+        final BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         // create thread for test case
         for (int i = 0; i < tc; i++) {
             Thread t = new Thread() {
@@ -145,7 +146,7 @@ public class JobProducerConsumerTest {
                         return;
                     }
 
-                    JobProducer producer = new JobProducer(config, "pctube");
+                    JobProducer producer = factory.createJobProducer("pctube");
 
                     for (int i = 0; i < 2; i++) {
                         funProduce(producer, i);
@@ -180,7 +181,7 @@ public class JobProducerConsumerTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         final Configuration config = new Configuration();
-
+        final BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         // create thread for test case
         for (int i = 0; i < tc; i++) {
             Thread t = new Thread() {
@@ -193,7 +194,7 @@ public class JobProducerConsumerTest {
                         return;
                     }
 
-                    JobProducer producer = new JobProducer(config, "pctube");
+                    JobProducer producer = factory.createJobProducer("pctube");
 
                     for (int i = 0; i < 5; i++) {
                         funProduce(producer, i);
@@ -228,7 +229,7 @@ public class JobProducerConsumerTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         final Configuration config = new Configuration();
-
+        final BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         // create thread for test case
         for (int i = 0; i < tc; i++) {
             Thread t = new Thread() {
@@ -241,7 +242,7 @@ public class JobProducerConsumerTest {
                         return;
                     }
 
-                    JobProducer producer = new JobProducer(config, "pctube");
+                    JobProducer producer = factory.createJobProducer("pctube");
 
                     for (int i = 0; i < 10; i++) {
                         funProduce(producer, i);
@@ -452,7 +453,7 @@ public class JobProducerConsumerTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         final Configuration config = new Configuration();
-
+        final BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         // create thread for test case
         for (int i = 0; i < tc; i++) {
             Thread t = new Thread() {
@@ -465,7 +466,7 @@ public class JobProducerConsumerTest {
                         return;
                     }
 
-                    consumer = new JobConsumer(config, "pctube");
+                    consumer = factory.createJobConsumer("pctube");
                     for (int i = 0; i < 1; i++) {
                         funConsume(consumer, i);
                     }

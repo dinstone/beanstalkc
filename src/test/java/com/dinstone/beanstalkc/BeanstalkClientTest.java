@@ -21,13 +21,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.dinstone.beanstalkc.internal.BeanstalkClient;
+
 public class BeanstalkClientTest {
 
     private BeanstalkClient client;
 
     @Before
     public void setUp() throws Exception {
-        client = new BeanstalkClient();
+        client = new BeanstalkClient(new Configuration());
         client.useTube("br");
         client.watchTube("br");
     }

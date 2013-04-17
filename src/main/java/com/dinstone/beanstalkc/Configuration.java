@@ -29,9 +29,13 @@ import org.slf4j.LoggerFactory;
  * @author guojf
  * @version 1.0.0.2013-4-10
  */
-public class Configuration {
+public final class Configuration {
 
     private static final Logger LOG = LoggerFactory.getLogger(Configuration.class);
+
+    private static String configFileName = "beanstalkc.properties";
+
+    private static Properties defProperties = new Properties();
 
     /** beanstalk server host name */
     public static final String REMOTE_HOST = "RemoteHost";
@@ -42,11 +46,11 @@ public class Configuration {
     /** option timeout (s) */
     public static final String OPTION_TIMEOUT = "OptionTimeout";
 
-    private Properties properties = new Properties();
+    static {
+        initDefault();
+    }
 
-    private String configFileName = "beanstalkc.properties";
-
-    private void initDefault() {
+    private static void initDefault() {
         InputStream in = null;
         try {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -54,12 +58,12 @@ public class Configuration {
                 classLoader = Configuration.class.getClassLoader();
             }
 
-            in = classLoader.getResourceAsStream(this.configFileName);
+            in = classLoader.getResourceAsStream(configFileName);
             if (in != null) {
-                properties.load(in);
+                defProperties.load(in);
             }
         } catch (IOException e) {
-            LOG.warn("can't load default configuration file [" + this.configFileName + "] from classpath.", e);
+            LOG.warn("can't load default configuration file [" + configFileName + "] from classpath.", e);
         } finally {
             if (in != null) {
                 try {
@@ -70,21 +74,13 @@ public class Configuration {
         }
     }
 
+    private final Properties properties;
+
     /**
      * loading default properties from classpath
      */
     public Configuration() {
-        initDefault();
-    }
-
-    /**
-     * loading properties by configFileName from classpath
-     * 
-     * @param configFileName
-     */
-    public Configuration(String configFileName) {
-        this.configFileName = configFileName;
-        initDefault();
+        this(null);
     }
 
     /**
@@ -94,7 +90,9 @@ public class Configuration {
      * @param properties
      */
     public Configuration(Properties properties) {
-        initDefault();
+        this.properties = new Properties();
+        this.properties.putAll(defProperties);
+
         if (properties != null) {
             this.properties.putAll(properties);
         }

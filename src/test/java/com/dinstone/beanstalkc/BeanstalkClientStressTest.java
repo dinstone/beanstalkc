@@ -20,11 +20,13 @@ import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
 
+import com.dinstone.beanstalkc.internal.BeanstalkClient;
+
 public class BeanstalkClientStressTest {
 
     @Test
     public void testStrees00() {
-        BeanstalkClient client = new BeanstalkClient();
+        BeanstalkClient client = new BeanstalkClient(new Configuration());
         client.useTube("someone");
         client.watchTube("someone");
 

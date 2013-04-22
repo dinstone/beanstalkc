@@ -59,21 +59,15 @@ public class BeanstalkClientFactory {
         ConnectionInitializer initer = new ConnectionInitializer() {
 
             @Override
-            public void initConnection(Connection connection) {
+            public void initConnection(Connection connection) throws Exception {
                 if (watchTubes != null && watchTubes.length > 0) {
                     for (int i = 0; i < watchTubes.length; i++) {
-                        try {
-                            connection.handle(new WatchOperation(watchTubes[i])).get();
-                        } catch (Exception e) {
-                        }
+                        connection.handle(new WatchOperation(watchTubes[i])).get();
                     }
                 }
 
                 if (ignoreDefault) {
-                    try {
-                        connection.handle(new IgnoreOperation("default")).get();
-                    } catch (Exception e) {
-                    }
+                    connection.handle(new IgnoreOperation("default")).get();
                 }
             }
         };
@@ -91,12 +85,9 @@ public class BeanstalkClientFactory {
         ConnectionInitializer initer = new ConnectionInitializer() {
 
             @Override
-            public void initConnection(Connection connection) {
+            public void initConnection(Connection connection) throws Exception {
                 if (useTube != null) {
-                    try {
-                        connection.handle(new UseOperation(useTube)).get();
-                    } catch (Exception e) {
-                    }
+                    connection.handle(new UseOperation(useTube)).get();
                 }
             }
         };

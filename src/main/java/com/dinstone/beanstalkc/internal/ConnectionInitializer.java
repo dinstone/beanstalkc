@@ -24,6 +24,7 @@ public interface ConnectionInitializer {
 
     /**
      * @param connection
+     * @throws Exception
      */
-    public void initConnection(Connection connection);
+    public void initConnection(Connection connection) throws Exception;
 }

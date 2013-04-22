@@ -78,9 +78,19 @@ public class OperationConnection implements Connection {
         if (!isConnected()) {
             ioSession = connector.createSession();
             SessionUtil.setConnection(ioSession, this);
+            try {
+                if (initializer != null) {
+                    initializer.initConnection(this);
+                }
+            } catch (Exception e) {
+                ioSession.close(true);
+                ioSession = null;
 
-            if (initializer != null) {
-                initializer.initConnection(this);
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                } else {
+                    throw new RuntimeException("can't init connection", e);
+                }
             }
         }
     }

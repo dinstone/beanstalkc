@@ -38,13 +38,15 @@ public class AbstractOperation<R> implements Operation<R> {
 
     protected String command;
 
+    protected byte[] data;
+
     public AbstractOperation(OperationFuture<R> future) {
         this.charset = Charset.forName("utf-8");
         this.future = future;
     }
 
     @Override
-    public IoBuffer commandBuffer(Charset charset, String delimiter) {
+    public IoBuffer prepareRequest(Charset charset, String delimiter) {
         IoBuffer buffer = IoBuffer.allocate(64);
         buffer.setAutoExpand(true);
 

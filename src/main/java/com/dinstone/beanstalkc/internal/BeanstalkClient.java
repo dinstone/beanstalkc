@@ -22,6 +22,7 @@ import com.dinstone.beanstalkc.Configuration;
 import com.dinstone.beanstalkc.Job;
 import com.dinstone.beanstalkc.JobConsumer;
 import com.dinstone.beanstalkc.JobProducer;
+import com.dinstone.beanstalkc.internal.operation.AbstractOperation;
 import com.dinstone.beanstalkc.internal.operation.BuryOperation;
 import com.dinstone.beanstalkc.internal.operation.DeleteOperation;
 import com.dinstone.beanstalkc.internal.operation.IgnoreOperation;
@@ -95,7 +96,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
      */
     @Override
     public long putJob(int priority, int delay, int ttr, byte[] data) {
-        PutOperation operation = new PutOperation(priority, delay, ttr, data);
+        AbstractOperation<Long> operation = new PutOperation(priority, delay, ttr, data);
         OperationFuture<Long> future = connection.handle(operation);
         try {
             return future.get(optionTimeout, TimeUnit.SECONDS);

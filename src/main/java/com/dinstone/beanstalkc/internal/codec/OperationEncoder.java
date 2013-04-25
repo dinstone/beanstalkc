@@ -41,7 +41,7 @@ public class OperationEncoder extends ProtocolEncoderAdapter {
         if (message instanceof Operation) {
             Operation<?> operation = (Operation<?>) message;
 
-            IoBuffer buffer = operation.commandBuffer(charset, delimiter);
+            IoBuffer buffer = operation.prepareRequest(charset, delimiter);
             buffer.flip();
 
             out.write(buffer);

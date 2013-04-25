@@ -24,7 +24,7 @@ import com.dinstone.beanstalkc.internal.OperationFuture;
 
 public interface Operation<R> {
 
-    public IoBuffer commandBuffer(Charset charset, String delimiter);
+    public IoBuffer prepareRequest(Charset charset, String delimiter);
 
     public boolean parseReply(Charset charset, IoBuffer in);
 

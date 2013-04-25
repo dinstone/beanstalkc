@@ -56,8 +56,7 @@ public class OperationDecoder extends CumulativeProtocolDecoder {
 
     @Override
     protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
-        Queue<Operation<?>> queue = SessionUtil.getOperationQueue(session);
-        Operation<?> operation = queue.peek();
+        Operation<?> operation = SessionUtil.getOperationQueue(session).peek();
 
         int expect = operation.expect();
         if (expect == 0) {
@@ -158,8 +157,8 @@ public class OperationDecoder extends CumulativeProtocolDecoder {
 
     private void parse(IoSession session, IoBuffer in, ProtocolDecoderOutput out) {
         Queue<Operation<?>> queue = SessionUtil.getOperationQueue(session);
-        Operation<?> operation = queue.peek();
 
+        Operation<?> operation = queue.peek();
         boolean finish = operation.parseReply(charset, in);
         if (finish) {
             out.write(operation);

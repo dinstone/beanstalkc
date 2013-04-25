@@ -31,8 +31,6 @@ public class PutOperation extends AbstractOperation<Long> {
     /** default is 2^16 */
     private final int maxLength = 64 * 1024;
 
-    private byte[] data;
-
     public PutOperation(int priority, int delay, int ttr, byte[] data) {
         super(new OperationFuture<Long>());
         if (data == null) {
@@ -46,7 +44,7 @@ public class PutOperation extends AbstractOperation<Long> {
     }
 
     @Override
-    public IoBuffer commandBuffer(Charset charset, String delimiter) {
+    public IoBuffer prepareRequest(Charset charset, String delimiter) {
         byte[] delBytes = delimiter.getBytes(charset);
 
         IoBuffer buffer = IoBuffer.allocate(64);

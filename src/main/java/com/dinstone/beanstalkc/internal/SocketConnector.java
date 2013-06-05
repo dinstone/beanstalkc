@@ -87,8 +87,10 @@ public class SocketConnector implements Connector {
         // set handler
         ioConnector.setHandler(new ConnectionHandler());
 
-        InetSocketAddress address = new InetSocketAddress(config.getRemoteHost(), config.getRemotePort());
+        InetSocketAddress address = new InetSocketAddress(config.getServiceHost(), config.getServicePort());
         ioConnector.setDefaultRemoteAddress(address);
+
+        LOG.info("Initialize the socket to connect {}:{}", config.getServiceHost(), config.getServicePort());
     }
 
     /**

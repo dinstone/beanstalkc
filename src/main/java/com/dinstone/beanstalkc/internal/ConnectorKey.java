@@ -28,7 +28,7 @@ import com.dinstone.beanstalkc.Configuration;
  */
 public class ConnectorKey {
 
-    private static final String[] CONNECTION_PROPERTIES = { Configuration.REMOTE_HOST, Configuration.REMOTE_PORT };
+    private static final String[] CONNECTION_PROPERTIES = { Configuration.SERVICE_HOST, Configuration.SERVICE_PORT };
 
     private Map<String, String> properties;
 

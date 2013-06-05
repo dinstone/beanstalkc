@@ -43,7 +43,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
 
     private Connection connection;
 
-    private long optionTimeout;
+    private long operationTimeout;
 
     private Configuration config;
 
@@ -63,7 +63,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
             throw new IllegalArgumentException("config is null");
         }
         this.config = config;
-        this.optionTimeout = config.getLong(Configuration.OPTION_TIMEOUT, 1);
+        this.operationTimeout = config.getLong(Configuration.OPERATION_TIMEOUT, 1);
 
         ConnectionFactory factory = ConnectionFactory.getInstance();
         this.connection = factory.createConnection(config, initer);
@@ -98,7 +98,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         PutOperation operation = new PutOperation(priority, delay, ttr, data);
         OperationFuture<Long> future = connection.handle(operation);
         try {
-            return future.get(optionTimeout, TimeUnit.SECONDS);
+            return future.get(operationTimeout, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -155,7 +155,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         ReserveOperation operation = new ReserveOperation(timeout);
         OperationFuture<Job> future = connection.handle(operation);
         try {
-            return future.get(optionTimeout, TimeUnit.SECONDS);
+            return future.get(operationTimeout, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -188,7 +188,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
 
     private boolean getBoolean(OperationFuture<Boolean> future) {
         try {
-            return future.get(optionTimeout, TimeUnit.SECONDS);
+            return future.get(operationTimeout, TimeUnit.SECONDS);
         } catch (Exception e) {
             return false;
         }

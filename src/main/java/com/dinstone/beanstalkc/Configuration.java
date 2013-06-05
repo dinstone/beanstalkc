@@ -19,12 +19,13 @@ package com.dinstone.beanstalkc;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Beanstalk client configuration.
+ * Beanstalkc configuration.
  * 
  * @author guojf
  * @version 1.0.0.2013-4-10
@@ -33,18 +34,18 @@ public final class Configuration {
 
     private static final Logger LOG = LoggerFactory.getLogger(Configuration.class);
 
-    private static String configFileName = "beanstalkc.properties";
+    private static final String DEFAULT_CONFIG_FILE = "beanstalkc.properties";
 
-    private static Properties defProperties = new Properties();
+    private static final Properties DEFAULT_PROPERTIES = new Properties();
 
-    /** beanstalk server host name */
-    public static final String REMOTE_HOST = "RemoteHost";
+    /** beanstalk service host name */
+    public static final String SERVICE_HOST = "beanstalk.service.host";
 
-    /** beanstalk server listen port */
-    public static final String REMOTE_PORT = "RemotePort";
+    /** beanstalk service port */
+    public static final String SERVICE_PORT = "beanstalk.service.port";
 
-    /** option timeout (s) */
-    public static final String OPTION_TIMEOUT = "OptionTimeout";
+    /** operation timeout ({@link TimeUnit.MILLISECONDS}) */
+    public static final String OPERATION_TIMEOUT = "beanstalk.operation.timeout";
 
     static {
         initDefault();
@@ -58,12 +59,12 @@ public final class Configuration {
                 classLoader = Configuration.class.getClassLoader();
             }
 
-            in = classLoader.getResourceAsStream(configFileName);
+            in = classLoader.getResourceAsStream(DEFAULT_CONFIG_FILE);
             if (in != null) {
-                defProperties.load(in);
+                DEFAULT_PROPERTIES.load(in);
             }
         } catch (IOException e) {
-            LOG.warn("can't load default configuration file [" + configFileName + "] from classpath.", e);
+            LOG.warn("can't load default configuration file [" + DEFAULT_CONFIG_FILE + "] from classpath.", e);
         } finally {
             if (in != null) {
                 try {
@@ -91,7 +92,7 @@ public final class Configuration {
      */
     public Configuration(Properties properties) {
         this.properties = new Properties();
-        this.properties.putAll(defProperties);
+        this.properties.putAll(DEFAULT_PROPERTIES);
 
         if (properties != null) {
             this.properties.putAll(properties);
@@ -289,30 +290,30 @@ public final class Configuration {
     }
 
     /**
-     * get remote host
+     * get service host
      * 
      * @return
      */
-    public String getRemoteHost() {
-        return get(REMOTE_HOST);
+    public String getServiceHost() {
+        return get(SERVICE_HOST);
     }
 
     /**
-     * set remote host
+     * set service host
      * 
      * @param host
      */
-    public void setRemoteHost(String host) {
-        set(REMOTE_HOST, host);
+    public void setServiceHost(String host) {
+        set(SERVICE_HOST, host);
     }
 
     /**
-     * get remote port
+     * get service port
      * 
      * @return
      */
-    public int getRemotePort() {
-        return getInt(REMOTE_PORT, 11300);
+    public int getServicePort() {
+        return getInt(SERVICE_PORT, 11300);
     }
 
     /**
@@ -320,8 +321,8 @@ public final class Configuration {
      * 
      * @param port
      */
-    public void setRemotePort(int port) {
-        setInt(REMOTE_PORT, port);
+    public void setServicePort(int port) {
+        setInt(SERVICE_PORT, port);
     }
 
 }

@@ -65,7 +65,7 @@ public class OperationFuture<T> {
             if (!done) {
                 boolean success = ready.await(timeout, unit);
                 if (!success) {
-                    throw new TimeoutException();
+                    throw new TimeoutException("operation timeout (" + timeout + " " + unit + ")");
                 }
             }
         } finally {

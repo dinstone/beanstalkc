@@ -17,6 +17,7 @@
 package com.dinstone.beanstalkc.internal;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import com.dinstone.beanstalkc.Configuration;
 import com.dinstone.beanstalkc.Job;
@@ -156,7 +157,10 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
         OperationFuture<Job> future = connection.handle(operation);
         try {
             return future.get(operationTimeout, TimeUnit.SECONDS);
-        } catch (Exception e) {
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -189,8 +193,11 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
     private boolean getBoolean(OperationFuture<Boolean> future) {
         try {
             return future.get(operationTimeout, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            return false;
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
         }
     }
 }

@@ -22,7 +22,7 @@ import org.apache.mina.core.session.IoSession;
 
 import com.dinstone.beanstalkc.internal.operation.Operation;
 
-public class OperationConnection implements Connection {
+public class DefaultConnection implements Connection {
 
     private boolean closed;
 
@@ -32,7 +32,7 @@ public class OperationConnection implements Connection {
 
     private final ConnectionInitializer initializer;
 
-    public OperationConnection(Connector connector, ConnectionInitializer initializer) {
+    public DefaultConnection(Connector connector, ConnectionInitializer initializer) {
         this.connector = connector;
         this.initializer = initializer;
     }

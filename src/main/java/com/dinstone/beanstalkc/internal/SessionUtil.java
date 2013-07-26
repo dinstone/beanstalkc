@@ -25,12 +25,19 @@ import com.dinstone.beanstalkc.internal.operation.Operation;
 
 public class SessionUtil {
 
+    /**  */
+    private static final String OPERATION_QUEUE = "OPERATION_QUEUE";
+
     @SuppressWarnings("unchecked")
     public static Queue<Operation<?>> getOperationQueue(IoSession session) {
-        Queue<Operation<?>> optQueue = (Queue<Operation<?>>) session.getAttribute("OPERATION_QUEUE");
+        Queue<Operation<?>> optQueue = (Queue<Operation<?>>) session.getAttribute(OPERATION_QUEUE);
         if (optQueue == null) {
             optQueue = new ConcurrentLinkedQueue<Operation<?>>();
-            session.setAttribute("OPERATION_QUEUE", optQueue);
+            Queue<Operation<?>> oldQueue = (Queue<Operation<?>>) session
+                .setAttributeIfAbsent(OPERATION_QUEUE, optQueue);
+            if (oldQueue != null) {
+                optQueue = oldQueue;
+            }
         }
         return optQueue;
     }

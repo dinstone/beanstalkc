@@ -25,10 +25,10 @@ public class ConnectionFactory {
 
     private static final ConnectionFactory factory = new ConnectionFactory();
 
-    private final Map<ConnectorKey, SocketConnector> cachedConnectors;
+    private final Map<ConnectorKey, DefaultConnector> cachedConnectors;
 
     protected ConnectionFactory() {
-        cachedConnectors = new HashMap<ConnectorKey, SocketConnector>();
+        cachedConnectors = new HashMap<ConnectorKey, DefaultConnector>();
     }
 
     public static ConnectionFactory getInstance() {
@@ -42,20 +42,20 @@ public class ConnectionFactory {
     public Connection createConnection(Configuration config, ConnectionInitializer initer) {
         ConnectorKey ckey = new ConnectorKey(config);
         synchronized (cachedConnectors) {
-            SocketConnector connector = cachedConnectors.get(ckey);
+            DefaultConnector connector = cachedConnectors.get(ckey);
             if (connector == null) {
-                connector = new SocketConnector(config);
+                connector = new DefaultConnector(config);
                 cachedConnectors.put(ckey, connector);
             }
             connector.incrementRefCount();
-            return new OperationConnection(connector, initer);
+            return new DefaultConnection(connector, initer);
         }
     }
 
     public void releaseConnection(Configuration config) {
         ConnectorKey ckey = new ConnectorKey(config);
         synchronized (cachedConnectors) {
-            SocketConnector connector = cachedConnectors.get(ckey);
+            DefaultConnector connector = cachedConnectors.get(ckey);
             if (connector != null) {
                 connector.decrementRefCount();
                 if (connector.isZeroRefCount()) {

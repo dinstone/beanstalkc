@@ -610,4 +610,56 @@ public class BeanstalkClientStressTest {
         }
     }
 
+    @Test
+    public void testStreesPut() {
+        int tc = 4;
+        final CountDownLatch doneLatch = new CountDownLatch(tc);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+
+        Configuration config = new Configuration();
+        final BeanstalkClient client = new BeanstalkClient(config);
+        client.useTube("stress");
+
+        // create thread for test case
+        for (int i = 0; i < tc; i++) {
+            Thread t = new Thread() {
+
+                @Override
+                public void run() {
+                    try {
+                        startLatch.await();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+
+                    for (int i = 0; i < 10000; i++) {
+                        try {
+                            client.putJob(1, 0, 5000, "this is some data".getBytes());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    doneLatch.countDown();
+                }
+
+            };
+            t.setName("t-" + i);
+            t.start();
+        }
+
+        try {
+            Thread.sleep(1000);
+            startLatch.countDown();
+            long anyStart = System.currentTimeMillis();
+            doneLatch.await();
+            long anyEnd = System.currentTimeMillis();
+            long ts = anyEnd - anyStart;
+            System.out.println("this case takes " + ts + " ms, the rate is " + (tc * 10000000 / ts) + " p/s");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }

@@ -29,7 +29,9 @@ public class BeanstalkClientTest {
 
     @Before
     public void setUp() throws Exception {
-        client = new BeanstalkClient(new Configuration());
+        Configuration config = new Configuration();
+        config.set("beanstalk.operation.timeout", "300000");
+        client = new BeanstalkClient(config);
         client.useTube("br");
         client.watchTube("br");
     }

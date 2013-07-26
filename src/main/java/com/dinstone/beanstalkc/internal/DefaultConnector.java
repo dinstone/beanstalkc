@@ -39,9 +39,9 @@ import com.dinstone.beanstalkc.internal.codec.OperationEncoder;
  * @author guojf
  * @version 1.0.0.2013-4-11
  */
-public class SocketConnector implements Connector {
+public class DefaultConnector implements Connector {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SocketConnector.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultConnector.class);
 
     private NioSocketConnector ioConnector;
 
@@ -51,7 +51,7 @@ public class SocketConnector implements Connector {
      * @param config
      * @param ioConnector
      */
-    public SocketConnector(Configuration config) {
+    public DefaultConnector(Configuration config) {
         initConnector(config);
     }
 

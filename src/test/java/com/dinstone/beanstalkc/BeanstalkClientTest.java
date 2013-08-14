@@ -16,22 +16,25 @@
 
 package com.dinstone.beanstalkc;
 
+import java.util.List;
+import java.util.Map;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dinstone.beanstalkc.internal.BeanstalkClient;
+import com.dinstone.beanstalkc.internal.DefaultBeanstalkClient;
 
 public class BeanstalkClientTest {
 
-    private BeanstalkClient client;
+    private DefaultBeanstalkClient client;
 
     @Before
     public void setUp() throws Exception {
         Configuration config = new Configuration();
         config.set("beanstalk.operation.timeout", "300000");
-        client = new BeanstalkClient(config);
+        client = new DefaultBeanstalkClient(config);
         client.useTube("br");
         client.watchTube("br");
     }
@@ -105,4 +108,60 @@ public class BeanstalkClientTest {
         Assert.assertNotNull(job);
     }
 
+    @Test
+    public void testStats() {
+        Map<String, String> sm = client.stats();
+        System.out.println(sm);
+        Assert.assertNotNull(sm);
+
+        sm = client.statsTube("br");
+        System.out.println(sm);
+        Assert.assertNotNull(sm);
+
+        sm = client.statsJob(1234);
+        Assert.assertNull(sm);
+    }
+
+    @Test
+    public void testListTube() {
+        List<String> ts = client.listTubes();
+        Assert.assertNotNull(ts);
+        System.out.println(ts);
+
+        ts = client.listTubeWatched();
+        Assert.assertNotNull(ts);
+        System.out.println(ts);
+
+        String us = client.listTubeUsed();
+        Assert.assertNotNull(us);
+        System.out.println(us);
+    }
+
+    @Test
+    public void testKick() {
+        long kicked = client.kick(2);
+        Assert.assertEquals(0, kicked);
+    }
+
+    @Test
+    public void testPeek() {
+        while (true) {
+            Job job = client.peekReady();
+            if (job != null) {
+                client.deleteJob(job.getId());
+            } else {
+                break;
+            }
+        }
+
+        long[] ids = new long[5];
+        for (int i = 0; i < ids.length; i++) {
+            String msg = "this is some " + i + " \r\n data";
+            ids[i] = client.putJob(1, 0, 5000, msg.getBytes());
+        }
+
+        Job job = client.peekReady();
+        Assert.assertNotNull(job);
+        Assert.assertEquals(ids[0], job.getId());
+    }
 }

@@ -31,6 +31,10 @@ public class OperationEncoder extends ProtocolEncoderAdapter {
 
     private String delimiter;
 
+    public OperationEncoder(Charset charset) {
+        this(charset, "\r\n");
+    }
+
     public OperationEncoder(Charset charset, String delimiter) {
         this.charset = charset;
         this.delimiter = delimiter;

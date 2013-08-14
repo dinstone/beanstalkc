@@ -67,20 +67,24 @@ public class DefaultConnector implements Connector {
         LOG.debug("SendBufferSize is {}", sessionConfig.getSendBufferSize());
 
         // add filter
-        DefaultIoFilterChainBuilder chain = ioConnector.getFilterChain();
+        DefaultIoFilterChainBuilder chainBuilder = ioConnector.getFilterChain();
 
-        final Charset charset = Charset.forName("utf-8");
-        final String delimiter = "\r\n";
-        chain.addLast("codec", new ProtocolCodecFilter(new ProtocolCodecFactory() {
+        String charsetName = config.get("beanstalk.protocol.charset");
+        Charset charset = Charset.forName(charsetName == null ? "ASCII" : charsetName);
+        LOG.debug("beanstalk.protocol.charset is {}", charset);
+
+        final OperationEncoder encoder = new OperationEncoder(charset);
+        final OperationDecoder decoder = new OperationDecoder(charset);
+        chainBuilder.addLast("codec", new ProtocolCodecFilter(new ProtocolCodecFactory() {
 
             @Override
             public ProtocolEncoder getEncoder(IoSession session) throws Exception {
-                return new OperationEncoder(charset, delimiter);
+                return encoder;
             }
 
             @Override
             public ProtocolDecoder getDecoder(IoSession session) throws Exception {
-                return new OperationDecoder(charset, delimiter);
+                return decoder;
             }
         }));
 
@@ -89,8 +93,6 @@ public class DefaultConnector implements Connector {
 
         InetSocketAddress address = new InetSocketAddress(config.getServiceHost(), config.getServicePort());
         ioConnector.setDefaultRemoteAddress(address);
-
-        LOG.info("Initialize the socket to connect {}:{}", config.getServiceHost(), config.getServicePort());
     }
 
     /**
@@ -98,6 +100,7 @@ public class DefaultConnector implements Connector {
      */
     @Override
     public IoSession createSession() {
+        LOG.info("Connecting to beanstalkd service on {}", ioConnector.getDefaultRemoteAddress());
         // create session
         ConnectFuture cf = ioConnector.connect();
         cf.awaitUninterruptibly();

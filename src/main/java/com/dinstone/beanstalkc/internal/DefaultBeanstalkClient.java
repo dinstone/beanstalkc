@@ -16,20 +16,26 @@
 
 package com.dinstone.beanstalkc.internal;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.dinstone.beanstalkc.BeanstalkClient;
 import com.dinstone.beanstalkc.Configuration;
 import com.dinstone.beanstalkc.Job;
-import com.dinstone.beanstalkc.JobConsumer;
-import com.dinstone.beanstalkc.JobProducer;
 import com.dinstone.beanstalkc.internal.operation.BuryOperation;
 import com.dinstone.beanstalkc.internal.operation.DeleteOperation;
 import com.dinstone.beanstalkc.internal.operation.IgnoreOperation;
+import com.dinstone.beanstalkc.internal.operation.KickOperation;
+import com.dinstone.beanstalkc.internal.operation.ListTubeOperation;
+import com.dinstone.beanstalkc.internal.operation.PeekOperation;
+import com.dinstone.beanstalkc.internal.operation.PeekOperation.Type;
 import com.dinstone.beanstalkc.internal.operation.PutOperation;
 import com.dinstone.beanstalkc.internal.operation.QuitOperation;
 import com.dinstone.beanstalkc.internal.operation.ReleaseOperation;
 import com.dinstone.beanstalkc.internal.operation.ReserveOperation;
+import com.dinstone.beanstalkc.internal.operation.StatsOperation;
 import com.dinstone.beanstalkc.internal.operation.TouchOperation;
 import com.dinstone.beanstalkc.internal.operation.UseOperation;
 import com.dinstone.beanstalkc.internal.operation.WatchOperation;
@@ -40,7 +46,7 @@ import com.dinstone.beanstalkc.internal.operation.WatchOperation;
  * @author guojf
  * @version 1.0.0.2013-4-11
  */
-public class BeanstalkClient implements JobProducer, JobConsumer {
+public class DefaultBeanstalkClient implements BeanstalkClient {
 
     private Connection connection;
 
@@ -51,7 +57,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
     /**
      * @param config
      */
-    public BeanstalkClient(Configuration config) {
+    public DefaultBeanstalkClient(Configuration config) {
         this(config, null);
     }
 
@@ -59,7 +65,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
      * @param config
      * @param initer
      */
-    public BeanstalkClient(Configuration config, ConnectionInitializer initer) {
+    public DefaultBeanstalkClient(Configuration config, ConnectionInitializer initer) {
         if (config == null) {
             throw new IllegalArgumentException("config is null");
         }
@@ -71,7 +77,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
     }
 
     // ************************************************************************
-    // Consumer methods
+    // Produce methods
     // ************************************************************************
 
     /**
@@ -84,6 +90,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
      *        tube does not exist, it will be created.
      * @return
      */
+    @Override
     public boolean useTube(String tube) {
         UseOperation operation = new UseOperation(tube);
         return getBoolean(connection.handle(operation));
@@ -109,6 +116,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
     // Consumer methods
     // ************************************************************************
 
+    @Override
     public boolean ignoreTube(String tube) {
         IgnoreOperation operation = new IgnoreOperation(tube);
         return getBoolean(connection.handle(operation));
@@ -123,6 +131,7 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
      * @param tube
      * @return
      */
+    @Override
     public boolean watchTube(String tube) {
         WatchOperation operation = new WatchOperation(tube);
         return getBoolean(connection.handle(operation));
@@ -200,4 +209,174 @@ public class BeanstalkClient implements JobProducer, JobConsumer {
             throw new RuntimeException(e);
         }
     }
+
+    // ************************************************************************
+    // Other methods
+    // ************************************************************************
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.BeanstalkClient#kick(long)
+     */
+    @Override
+    public long kick(long bound) {
+        KickOperation operation = new KickOperation(bound);
+        try {
+            return connection.handle(operation).get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.BeanstalkClient#peek(long)
+     */
+    @Override
+    public Job peek(long jobId) {
+        PeekOperation operation = new PeekOperation(jobId);
+        try {
+            return connection.handle(operation).get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.BeanstalkClient#peekReady()
+     */
+    @Override
+    public Job peekReady() {
+        PeekOperation operation = new PeekOperation(Type.ready);
+        try {
+            return connection.handle(operation).get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.BeanstalkClient#peekDelayed()
+     */
+    @Override
+    public Job peekDelayed() {
+        PeekOperation operation = new PeekOperation(Type.delayed);
+        try {
+            return connection.handle(operation).get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.BeanstalkClient#peekBuried()
+     */
+    @Override
+    public Job peekBuried() {
+        PeekOperation operation = new PeekOperation(PeekOperation.Type.buried);
+        try {
+            return connection.handle(operation).get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.BeanstalkClient#statsJob(long)
+     */
+    @Override
+    public Map<String, String> statsJob(long jobId) {
+        StatsOperation operation = new StatsOperation(jobId);
+        try {
+            return connection.handle(operation).get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.BeanstalkClient#statsTube(java.lang.String)
+     */
+    @Override
+    public Map<String, String> statsTube(String tubeName) {
+        StatsOperation operation = new StatsOperation(tubeName);
+        try {
+            return connection.handle(operation).get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.BeanstalkClient#stats()
+     */
+    @Override
+    public Map<String, String> stats() {
+        StatsOperation operation = new StatsOperation();
+        try {
+            return connection.handle(operation).get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.BeanstalkClient#listTubes()
+     */
+    @Override
+    public List<String> listTubes() {
+        ListTubeOperation operation = new ListTubeOperation(ListTubeOperation.Type.all);
+        try {
+            return connection.handle(operation).get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.BeanstalkClient#listTubeUsed()
+     */
+    @Override
+    public String listTubeUsed() {
+        ListTubeOperation operation = new ListTubeOperation(ListTubeOperation.Type.used);
+        try {
+            return connection.handle(operation).get().get(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see com.dinstone.beanstalkc.BeanstalkClient#listTubeWatched()
+     */
+    @Override
+    public List<String> listTubeWatched() {
+        ListTubeOperation operation = new ListTubeOperation(ListTubeOperation.Type.watched);
+        try {
+            return connection.handle(operation).get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

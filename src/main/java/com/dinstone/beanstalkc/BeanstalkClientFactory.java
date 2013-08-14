@@ -16,16 +16,16 @@
 
 package com.dinstone.beanstalkc;
 
-import com.dinstone.beanstalkc.internal.BeanstalkClient;
 import com.dinstone.beanstalkc.internal.Connection;
 import com.dinstone.beanstalkc.internal.ConnectionInitializer;
+import com.dinstone.beanstalkc.internal.DefaultBeanstalkClient;
 import com.dinstone.beanstalkc.internal.operation.IgnoreOperation;
 import com.dinstone.beanstalkc.internal.operation.UseOperation;
 import com.dinstone.beanstalkc.internal.operation.WatchOperation;
 
 /**
- * {@link BeanstalkClientFactory} is a factory class, that is that is
- * responsible for the creation beanstalk client.
+ * {@link BeanstalkClientFactory} is a factory class, that is responsible for
+ * the creation beanstalk client.
  * 
  * @author guojf
  * @version 2.0.0.2013-4-17
@@ -45,6 +45,15 @@ public class BeanstalkClientFactory {
             throw new IllegalArgumentException("config is null");
         }
         this.config = config;
+    }
+
+    /**
+     * create a beanstalk client.
+     * 
+     * @return
+     */
+    public BeanstalkClient createBeanstalkClient() {
+        return new DefaultBeanstalkClient(config, null);
     }
 
     /**
@@ -71,7 +80,7 @@ public class BeanstalkClientFactory {
                 }
             }
         };
-        return new BeanstalkClient(config, initer);
+        return new DefaultBeanstalkClient(config, initer);
     }
 
     /**
@@ -91,6 +100,6 @@ public class BeanstalkClientFactory {
                 }
             }
         };
-        return new BeanstalkClient(config, initer);
+        return new DefaultBeanstalkClient(config, initer);
     }
 }

@@ -20,13 +20,13 @@ import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
 
-import com.dinstone.beanstalkc.internal.BeanstalkClient;
+import com.dinstone.beanstalkc.internal.DefaultBeanstalkClient;
 
 public class BeanstalkClientStressTest {
 
     @Test
     public void testStrees00() {
-        BeanstalkClient client = new BeanstalkClient(new Configuration());
+        DefaultBeanstalkClient client = new DefaultBeanstalkClient(new Configuration());
         client.useTube("someone");
         client.watchTube("someone");
 
@@ -55,7 +55,7 @@ public class BeanstalkClientStressTest {
 
                 @Override
                 public void run() {
-                    BeanstalkClient client = new BeanstalkClient(config);
+                    DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
                     client.useTube("someone");
                     client.watchTube("someone");
                     try {
@@ -104,7 +104,7 @@ public class BeanstalkClientStressTest {
 
                 @Override
                 public void run() {
-                    BeanstalkClient client = new BeanstalkClient(config);
+                    DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
                     client.useTube("someone");
                     client.watchTube("someone");
                     try {
@@ -153,7 +153,7 @@ public class BeanstalkClientStressTest {
 
                 @Override
                 public void run() {
-                    BeanstalkClient client = new BeanstalkClient(config);
+                    DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
                     client.useTube("someone");
                     client.watchTube("someone");
                     try {
@@ -202,7 +202,7 @@ public class BeanstalkClientStressTest {
 
                 @Override
                 public void run() {
-                    BeanstalkClient client = new BeanstalkClient(config);
+                    DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
                     client.useTube("someone");
                     client.watchTube("someone");
                     try {
@@ -246,7 +246,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
         Configuration config = new Configuration();
-        final BeanstalkClient client = new BeanstalkClient(config);
+        final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
 
@@ -295,7 +295,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
         Configuration config = new Configuration();
-        final BeanstalkClient client = new BeanstalkClient(config);
+        final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
 
@@ -344,7 +344,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
         Configuration config = new Configuration();
-        final BeanstalkClient client = new BeanstalkClient(config);
+        final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
 
@@ -393,7 +393,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
         Configuration config = new Configuration();
-        final BeanstalkClient client = new BeanstalkClient(config);
+        final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
 
@@ -442,7 +442,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
         Configuration config = new Configuration();
-        final BeanstalkClient client = new BeanstalkClient(config);
+        final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
 
@@ -491,7 +491,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
         Configuration config = new Configuration();
-        final BeanstalkClient client = new BeanstalkClient(config);
+        final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
 
@@ -540,7 +540,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
         Configuration config = new Configuration();
-        final BeanstalkClient client = new BeanstalkClient(config);
+        final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
 
@@ -584,7 +584,7 @@ public class BeanstalkClientStressTest {
      * @param client
      * @param i
      */
-    static void fun(final BeanstalkClient client, int i) {
+    static void fun(final DefaultBeanstalkClient client, int i) {
         try {
             for (int j = 0; j < 30; j++) {
                 String data = "this is data [" + i + "]";
@@ -617,7 +617,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch startLatch = new CountDownLatch(1);
 
         Configuration config = new Configuration();
-        final BeanstalkClient client = new BeanstalkClient(config);
+        final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("stress");
 
         // create thread for test case

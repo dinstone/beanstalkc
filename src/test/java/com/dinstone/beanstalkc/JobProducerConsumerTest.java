@@ -53,6 +53,32 @@ public class JobProducerConsumerTest {
     }
 
     @Test
+    public void testStrees000() {
+        long st = System.currentTimeMillis();
+
+        while (true) {
+            Job job = consumer.reserveJob(1);
+            if (job == null) {
+                break;
+            }
+            consumer.deleteJob(job.getId());
+        }
+
+        String data = "xxxxxxxxx";
+        producer.putJob(1, 1, 5000, data.getBytes());
+
+        Job job = consumer.reserveJob(2);
+        if (job != null) {
+            System.out.println(new String(job.getData()));
+        } else {
+            System.out.println("error");
+        }
+
+        long et = System.currentTimeMillis();
+        System.out.println("common case[produce] takes " + (et - st) + "ms");
+    }
+
+    @Test
     public void testStrees00() {
         long st = System.currentTimeMillis();
 

@@ -165,9 +165,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         ReserveOperation operation = new ReserveOperation(timeout);
         OperationFuture<Job> future = connection.handle(operation);
         try {
-            return future.get(operationTimeout, TimeUnit.SECONDS);
-        } catch (TimeoutException e) {
-            throw new RuntimeException(e);
+            return future.get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);

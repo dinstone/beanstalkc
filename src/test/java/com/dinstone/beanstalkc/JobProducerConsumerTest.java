@@ -19,6 +19,7 @@ package com.dinstone.beanstalkc;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -76,6 +77,25 @@ public class JobProducerConsumerTest {
 
         long et = System.currentTimeMillis();
         System.out.println("common case[produce] takes " + (et - st) + "ms");
+    }
+
+    @Test
+    public void testStrees001() {
+        Configuration config = new Configuration();
+        config.setBoolean("IgnoreDefaultTube", true);
+        BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
+        JobConsumer consumer = factory.createJobConsumer((String[]) null);
+        Job job = consumer.reserveJob(1);
+        Assert.assertNull(job);
+    }
+
+    @Test
+    public void testStrees002() {
+        Configuration config = new Configuration();
+        config.setBoolean("IgnoreDefaultTube", true);
+        BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
+        JobProducer producer = factory.createJobProducer(null);
+        producer.putJob(1, 1, 5000, "dddd".getBytes());
     }
 
     @Test

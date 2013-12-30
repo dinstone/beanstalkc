@@ -71,12 +71,12 @@ public class BeanstalkClientFactory {
             public void initConnection(Connection connection) throws Exception {
                 if (watchTubes != null && watchTubes.length > 0) {
                     for (int i = 0; i < watchTubes.length; i++) {
-                        connection.handle(new WatchOperation(watchTubes[i])).get();
+                        connection.handle(new WatchOperation(watchTubes[i]));
                     }
                 }
 
                 if (ignoreDefault) {
-                    connection.handle(new IgnoreOperation("default")).get();
+                    connection.handle(new IgnoreOperation("default"));
                 }
             }
         };
@@ -96,7 +96,7 @@ public class BeanstalkClientFactory {
             @Override
             public void initConnection(Connection connection) throws Exception {
                 if (useTube != null) {
-                    connection.handle(new UseOperation(useTube)).get();
+                    connection.handle(new UseOperation(useTube));
                 }
             }
         };

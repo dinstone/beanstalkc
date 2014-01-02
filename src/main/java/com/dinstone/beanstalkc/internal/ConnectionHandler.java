@@ -27,14 +27,13 @@ public class ConnectionHandler extends IoHandlerAdapter {
 
     @Override
     public void sessionClosed(IoSession session) throws Exception {
-        LOG.info("session[{}] is closed", session.getId());
+        LOG.info("Session[{}] is closed", session.getId());
     }
 
     @Override
     public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
         LOG.error("Unhandled Exception", cause);
-        Connection connection = SessionUtil.getConnection(session);
-        connection.destroy();
+        SessionUtil.getConnection(session).destroy();
     }
 
 }

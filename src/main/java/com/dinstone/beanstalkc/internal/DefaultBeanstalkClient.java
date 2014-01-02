@@ -107,7 +107,10 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         OperationFuture<Long> future = connection.handle(operation);
         try {
             return future.get(operationTimeout, TimeUnit.SECONDS);
-        } catch (Exception e) {
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -223,6 +226,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         try {
             return connection.handle(operation).get();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -238,6 +242,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         try {
             return connection.handle(operation).get();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -253,6 +258,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         try {
             return connection.handle(operation).get();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -268,6 +274,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         try {
             return connection.handle(operation).get();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -283,6 +290,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         try {
             return connection.handle(operation).get();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -298,6 +306,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         try {
             return connection.handle(operation).get();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -313,6 +322,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         try {
             return connection.handle(operation).get();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -328,6 +338,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         try {
             return connection.handle(operation).get();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -343,6 +354,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         try {
             return connection.handle(operation).get();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -358,6 +370,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         try {
             return connection.handle(operation).get().get(0);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -373,6 +386,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         try {
             return connection.handle(operation).get();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }

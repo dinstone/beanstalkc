@@ -102,8 +102,7 @@ public class DefaultConnector implements Connector {
     public IoSession createSession() {
         LOG.info("Connecting to beanstalkd service on {}", ioConnector.getDefaultRemoteAddress());
         // create session
-        ConnectFuture cf = ioConnector.connect();
-        cf.awaitUninterruptibly();
+        ConnectFuture cf = ioConnector.connect().awaitUninterruptibly();
 
         return cf.getSession();
     }

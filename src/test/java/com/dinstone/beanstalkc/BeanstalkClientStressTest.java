@@ -611,6 +611,27 @@ public class BeanstalkClientStressTest {
     }
 
     @Test
+    public void testStreesPut00() {
+        Configuration config = new Configuration();
+        final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
+        client.useTube("stress");
+
+        long anyStart = System.currentTimeMillis();
+        for (int i = 0; i < 10000; i++) {
+            try {
+                client.putJob(1, 0, 5000, "this is some data".getBytes());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        long anyEnd = System.currentTimeMillis();
+        long ts = anyEnd - anyStart;
+        System.out.println("this case takes " + ts + " ms, the rate is " + (1 * 10000000 / ts) + " p/s");
+
+        client.close();
+    }
+
+    @Test
     public void testStreesPut() {
         int tc = 4;
         final CountDownLatch doneLatch = new CountDownLatch(tc);

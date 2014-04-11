@@ -38,10 +38,9 @@ public class DefaultConnection implements Connection {
     }
 
     @Override
-    public synchronized <T> OperationFuture<T> handle(Operation<T> operation) {
+    public <T> OperationFuture<T> handle(Operation<T> operation) {
         connect();
 
-        SessionUtil.getOperationQueue(ioSession).add(operation);
         ioSession.write(operation);
 
         return operation.getOperationFuture();
@@ -70,7 +69,7 @@ public class DefaultConnection implements Connection {
         ioSession = null;
     }
 
-    private void connect() {
+    private synchronized void connect() {
         if (closed) {
             throw new RuntimeException("connection is closed");
         }

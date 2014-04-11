@@ -109,43 +109,35 @@ public class OperationDecoder extends CumulativeProtocolDecoder {
         // Remember the initial position.
         int start = in.position();
 
-        int matchCount = 0;
-        int delimLen = delimBuf.limit();
+        byte previous = 0;
         while (in.hasRemaining()) {
             byte current = in.get();
 
-            if (current == delimBuf.get(matchCount)) {
-                matchCount++;
-
-                if (delimLen == matchCount) {
-                    // Remember the current position and limit.
-                    int position = in.position();
-                    int limit = in.limit();
-                    try {
-                        in.position(start);
-                        in.limit(position - delimLen);
-                        // The bytes between in.position() and in.limit()
-                        // can't contain a full CRLF terminated line.
-                        parse(session, in.slice(), out);
-                    } finally {
-                        // Set the position to point right after the
-                        // detected line and set the limit to the old
-                        // one.
-                        in.limit(limit);
-                        in.position(position);
-                    }
-                    // Decoded one line; CumulativeProtocolDecoder will
-                    // call me again until I return false. So just
-                    // return true until there are no more lines in the
-                    // buffer.
-                    return true;
+            if (previous == '\r' && current == '\n') {
+                // Remember the current position and limit.
+                int position = in.position();
+                int limit = in.limit();
+                try {
+                    in.position(start);
+                    in.limit(position - 2);
+                    // The bytes between in.position() and in.limit()
+                    // can't contain a full CRLF terminated line.
+                    parse(session, in.slice(), out);
+                } finally {
+                    // Set the position to point right after the
+                    // detected line and set the limit to the old
+                    // one.
+                    in.limit(limit);
+                    in.position(position);
                 }
-            } else {
-                // fix for DIRMINA-506 & DIRMINA-536
-                in.position(Math.max(0, in.position() - matchCount));
-                matchCount = 0;
+                // Decoded one line; CumulativeProtocolDecoder will
+                // call me again until I return false. So just
+                // return true until there are no more lines in the
+                // buffer.
+                return true;
             }
 
+            previous = current;
         }
 
         // Could not find CRLF in the buffer. Reset the initial

@@ -682,5 +682,4 @@ public class BeanstalkClientStressTest {
         }
 
     }
-
 }

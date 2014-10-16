@@ -57,7 +57,7 @@ public class OperationDecoder extends CumulativeProtocolDecoder {
     @Override
     protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
         Operation<?> operation = SessionUtil.getOperationQueue(session).peek();
-
+        
         int expect = operation.expect();
         if (expect == 0) {
             return parseStatusLine(session, in, out);

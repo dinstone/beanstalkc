@@ -28,9 +28,6 @@ public class PutOperation extends AbstractOperation<Long> {
 
     private static final Logger LOG = LoggerFactory.getLogger(PutOperation.class);
 
-    /** default is 2^16 */
-    private final int maxLength = 64 * 1024;
-
     public PutOperation(int priority, int delay, int ttr, byte[] data) {
         super(new OperationFuture<Long>());
         if (data == null) {

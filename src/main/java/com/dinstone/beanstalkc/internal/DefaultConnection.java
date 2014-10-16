@@ -38,9 +38,10 @@ public class DefaultConnection implements Connection {
     }
 
     @Override
-    public <T> OperationFuture<T> handle(Operation<T> operation) {
+    public synchronized <T> OperationFuture<T> handle(final Operation<T> operation) {
         connect();
 
+        SessionUtil.getOperationQueue(ioSession).add(operation);
         ioSession.write(operation);
 
         return operation.getOperationFuture();

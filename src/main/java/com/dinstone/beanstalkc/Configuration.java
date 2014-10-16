@@ -47,6 +47,9 @@ public final class Configuration {
     /** operation timeout ({@link TimeUnit.MILLISECONDS}) */
     public static final String OPERATION_TIMEOUT = "beanstalk.operation.timeout";
 
+    /** max job size */
+    public static final String JOB_MAXSIZE = "beanstalk.job.maxSize";
+
     static {
         initDefault();
     }
@@ -323,6 +326,46 @@ public final class Configuration {
      */
     public void setServicePort(int port) {
         setInt(SERVICE_PORT, port);
+    }
+
+    /**
+     * the jobMaxSize to get
+     * 
+     * @return the jobMaxSize
+     * @see Configuration#jobMaxSize
+     */
+    public int getJobMaxSize() {
+        return getInt(JOB_MAXSIZE, 65536);
+    }
+
+    /**
+     * the jobMaxSize to set
+     * 
+     * @param jobMaxSize
+     * @see Configuration#jobMaxSize
+     */
+    public void setJobMaxSize(int jobMaxSize) {
+        setInt(JOB_MAXSIZE, jobMaxSize);
+    }
+
+    /**
+     * the operationTimeout to get
+     * 
+     * @return the operationTimeout
+     * @see Configuration#operationTimeout
+     */
+    public int getOperationTimeout() {
+        return getInt(OPERATION_TIMEOUT, 10);
+    }
+
+    /**
+     * the operationTimeout to set
+     * 
+     * @param operationTimeout
+     * @see Configuration#operationTimeout
+     */
+    public void setOperationTimeout(int operationTimeout) {
+        setInt(OPERATION_TIMEOUT, operationTimeout);
     }
 
 }

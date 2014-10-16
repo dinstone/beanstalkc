@@ -64,7 +64,7 @@ public class BeanstalkClientTest {
 
     @Test
     public void testPutJob01() {
-        long id = client.putJob(1, 0, 5000, new byte[1024 * 6]);
+        long id = client.putJob(1, 0, 5000, new byte[1024 * 64-1]);
         Assert.assertTrue(id != 0);
     }
 

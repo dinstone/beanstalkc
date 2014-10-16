@@ -24,6 +24,7 @@ import java.util.concurrent.TimeoutException;
 import com.dinstone.beanstalkc.BeanstalkClient;
 import com.dinstone.beanstalkc.Configuration;
 import com.dinstone.beanstalkc.Job;
+import com.dinstone.beanstalkc.internal.operation.AbstractOperation;
 import com.dinstone.beanstalkc.internal.operation.BuryOperation;
 import com.dinstone.beanstalkc.internal.operation.DeleteOperation;
 import com.dinstone.beanstalkc.internal.operation.IgnoreOperation;
@@ -70,7 +71,9 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
             throw new IllegalArgumentException("config is null");
         }
         this.config = config;
+
         this.operationTimeout = config.getLong(Configuration.OPERATION_TIMEOUT, 1);
+        AbstractOperation.maxLength = config.getJobMaxSize();
 
         ConnectionFactory factory = ConnectionFactory.getInstance();
         this.connection = factory.createConnection(config, initer);
@@ -103,7 +106,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
      */
     @Override
     public long putJob(int priority, int delay, int ttr, byte[] data) {
-        PutOperation operation = new PutOperation(priority, delay, ttr, data);
+        AbstractOperation<Long> operation = new PutOperation(priority, delay, ttr, data);
         OperationFuture<Long> future = connection.handle(operation);
         try {
             return future.get(operationTimeout, TimeUnit.SECONDS);

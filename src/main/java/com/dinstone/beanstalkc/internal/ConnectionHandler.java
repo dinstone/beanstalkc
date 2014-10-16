@@ -26,6 +26,11 @@ public class ConnectionHandler extends IoHandlerAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(ConnectionHandler.class);
 
     @Override
+    public void sessionCreated(IoSession session) throws Exception {
+        SessionUtil.setOperationQueue(session);
+    }
+
+    @Override
     public void sessionClosed(IoSession session) throws Exception {
         LOG.info("Session[{}] is closed", session.getId());
     }

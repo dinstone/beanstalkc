@@ -32,7 +32,8 @@ import com.dinstone.beanstalkc.internal.OperationFuture;
  */
 public class AbstractOperation<R> implements Operation<R> {
 
-    protected final Charset charset;
+    /** default is 2^16 */
+    public static int maxLength = 64 * 1024;
 
     protected final OperationFuture<R> future;
 
@@ -41,7 +42,6 @@ public class AbstractOperation<R> implements Operation<R> {
     protected byte[] data;
 
     public AbstractOperation(OperationFuture<R> future) {
-        this.charset = Charset.forName("utf-8");
         this.future = future;
     }
 

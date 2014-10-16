@@ -23,7 +23,6 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolEncoderAdapter;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 
-import com.dinstone.beanstalkc.internal.SessionUtil;
 import com.dinstone.beanstalkc.internal.operation.Operation;
 
 public class OperationEncoder extends ProtocolEncoderAdapter {
@@ -47,11 +46,7 @@ public class OperationEncoder extends ProtocolEncoderAdapter {
             Operation<?> operation = (Operation<?>) message;
 
             IoBuffer buffer = operation.prepareRequest(charset, delimiter).flip();
-
-            synchronized (session) {
-                SessionUtil.getOperationQueue(session).add(operation);
-                out.write(buffer);
-            }
+            out.write(buffer);
         }
     }
 }

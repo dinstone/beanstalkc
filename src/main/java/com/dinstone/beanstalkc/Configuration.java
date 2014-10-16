@@ -47,6 +47,9 @@ public final class Configuration {
     /** operation timeout ({@link TimeUnit.MILLISECONDS}) */
     public static final String OPERATION_TIMEOUT = "beanstalk.operation.timeout";
 
+    /** max job size */
+    public static final String JOB_MAXSIZE = "beanstalk.job.maxSize";
+
     static {
         initDefault();
     }

@@ -74,7 +74,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
         this.operationTimeout = config.getLong(Configuration.OPERATION_TIMEOUT, 1);
         AbstractOperation.maxLength = config.getJobMaxSize();
-
+        
         ConnectionFactory factory = ConnectionFactory.getInstance();
         this.connection = factory.createConnection(config, initer);
     }

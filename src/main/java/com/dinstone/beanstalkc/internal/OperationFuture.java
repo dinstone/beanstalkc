@@ -52,11 +52,10 @@ public class OperationFuture<T> {
             while (!done) {
                 ready.await();
             }
+            return getValue();
         } finally {
             lock.unlock();
         }
-
-        return getValue();
     }
 
     public T get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
@@ -68,11 +67,10 @@ public class OperationFuture<T> {
                     throw new TimeoutException("operation timeout (" + timeout + " " + unit + ")");
                 }
             }
+            return getValue();
         } finally {
             lock.unlock();
         }
-
-        return getValue();
     }
 
     private T getValue() {

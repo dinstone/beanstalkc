@@ -1,42 +1,59 @@
 /*
  * Copyright (C) 2012~2013 dinstone<dinstone@163.com>
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.dinstone.beanstalkc;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+import org.xml.sax.SAXException;
 
 /**
- * Beanstalkc configuration.
- * 
  * @author guojf
- * @version 1.0.0.2013-4-10
+ * @version 1.0.0.2013-6-5
  */
-public final class Configuration {
+public class Configuration {
 
     private static final Logger LOG = LoggerFactory.getLogger(Configuration.class);
 
-    private static final String DEFAULT_CONFIG_FILE = "beanstalkc.properties";
+    /** Prefix for system property placeholders: "${" */
+    private static final String PLACEHOLDER_PREFIX = "${";
 
-    private static final Properties DEFAULT_PROPERTIES = new Properties();
+    /** Suffix for system property placeholders: "}" */
+    private static final String PLACEHOLDER_SUFFIX = "}";
 
     /** beanstalk service host name */
     public static final String SERVICE_HOST = "beanstalk.service.host";
@@ -50,56 +67,222 @@ public final class Configuration {
     /** max job size */
     public static final String JOB_MAXSIZE = "beanstalk.job.maxSize";
 
-    static {
-        initDefault();
-    }
-
-    private static void initDefault() {
-        InputStream in = null;
-        try {
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            if (classLoader == null) {
-                classLoader = Configuration.class.getClassLoader();
-            }
-
-            in = classLoader.getResourceAsStream(DEFAULT_CONFIG_FILE);
-            if (in != null) {
-                DEFAULT_PROPERTIES.load(in);
-            }
-        } catch (IOException e) {
-            LOG.warn("can't load default configuration file [" + DEFAULT_CONFIG_FILE + "] from classpath.", e);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-    }
-
-    private final Properties properties;
+    private final Properties properties = new Properties();
 
     /**
-     * loading default properties from classpath
+     * 
      */
     public Configuration() {
-        this(null);
+    }
+
+    public Configuration(Configuration other) {
+        this.properties.putAll(other.properties);
     }
 
     /**
-     * loading default properties from classpath, then overriding default
-     * properties with <code>properties</code>
      * 
-     * @param properties
      */
-    public Configuration(Properties properties) {
-        this.properties = new Properties();
-        this.properties.putAll(DEFAULT_PROPERTIES);
-
-        if (properties != null) {
-            this.properties.putAll(properties);
+    public Configuration(String configLocation) {
+        if (configLocation == null) {
+            throw new IllegalArgumentException("configLocation is null");
         }
+        loadConfiguration(configLocation);
+    }
+
+    public void writeConfiguration(OutputStream out) {
+        try {
+            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            Element conf = doc.createElement("configuration");
+            doc.appendChild(conf);
+            for (Enumeration<?> e = properties.keys(); e.hasMoreElements();) {
+                String name = (String) e.nextElement();
+                Object object = properties.get(name);
+                String value = null;
+                if (object instanceof String) {
+                    value = (String) object;
+                } else {
+                    continue;
+                }
+                Element propNode = doc.createElement("property");
+                conf.appendChild(propNode);
+
+                Element nameNode = doc.createElement("name");
+                nameNode.appendChild(doc.createTextNode(name));
+                propNode.appendChild(nameNode);
+
+                Element valueNode = doc.createElement("value");
+                valueNode.appendChild(doc.createTextNode(value));
+                propNode.appendChild(valueNode);
+            }
+
+            TransformerFactory transFactory = TransformerFactory.newInstance();
+            Transformer transformer = transFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(out);
+            transformer.transform(source, result);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * load config file from classpath.
+     * 
+     * @param location
+     */
+    public void loadConfiguration(String location) {
+        InputStream stream = getResourceStream(location);
+        if (stream == null) {
+            throw new IllegalArgumentException("can't find out configuration [" + location + "] from classpath.");
+        }
+
+        try {
+            this.properties.putAll(loadResource(stream));
+        } catch (Exception e) {
+            throw new IllegalStateException("can't load configuration [" + location + "]", e);
+        }
+    }
+
+    /**
+     * @param resource
+     * @return
+     */
+    private InputStream getResourceStream(String resource) {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            classLoader = Configuration.class.getClassLoader();
+        }
+        return classLoader.getResourceAsStream(resource);
+    }
+
+    private Properties loadResource(InputStream in) throws IOException, ParserConfigurationException, SAXException {
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        // ignore all comments inside the xml file
+        builderFactory.setIgnoringComments(true);
+        // builderFactory.setCoalescing(true);
+        builderFactory.setIgnoringElementContentWhitespace(true);
+        builderFactory.setNamespaceAware(true);
+        // allow includes in the xml file
+        try {
+            builderFactory.setXIncludeAware(true);
+        } catch (UnsupportedOperationException e) {
+            LOG.error("Failed to set setXIncludeAware(true) for parser " + builderFactory + ":" + e, e);
+        }
+
+        DocumentBuilder builder = builderFactory.newDocumentBuilder();
+        Document doc = null;
+        try {
+            doc = builder.parse(in);
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+        }
+
+        Element root = doc.getDocumentElement();
+        if (!"configuration".equals(root.getTagName())) {
+            LOG.error("bad config file: top-level element not <configuration>");
+            throw new IllegalStateException("bad config file: top-level element not <configuration>");
+        }
+
+        Properties properties = new Properties();
+        parseConfig(properties, root);
+
+        return properties;
+    }
+
+    /**
+     * @param properties
+     * @param root
+     */
+    private static void parseConfig(Properties properties, Element root) {
+        NodeList props = root.getChildNodes();
+        for (int i = 0; i < props.getLength(); i++) {
+            Node propNode = props.item(i);
+            if (!(propNode instanceof Element)) {
+                continue;
+            }
+            Element prop = (Element) propNode;
+            if ("configuration".equals(prop.getTagName())) {
+                parseConfig(properties, prop);
+                continue;
+            }
+            if (!"property".equals(prop.getTagName())) {
+                LOG.warn("bad config file: element not <property>,skip this element {}", prop);
+                continue;
+            }
+
+            NodeList fields = prop.getChildNodes();
+            String attr = null;
+            String value = null;
+            for (int j = 0; j < fields.getLength(); j++) {
+                Node fieldNode = fields.item(j);
+                if (!(fieldNode instanceof Element)) {
+                    continue;
+                }
+                Element field = (Element) fieldNode;
+                if ("name".equals(field.getTagName()) && field.hasChildNodes()) {
+                    attr = ((Text) field.getFirstChild()).getData().trim();
+                }
+                if ("value".equals(field.getTagName()) && field.hasChildNodes()) {
+                    value = ((Text) field.getFirstChild()).getData();
+                    value = resolvePlaceholders(value);
+                }
+            }
+
+            if (attr != null && value != null) {
+                properties.setProperty(attr, value);
+            }
+        }
+    }
+
+    /**
+     * Resolve ${...} placeholders in the given text, replacing them with
+     * corresponding system property values.
+     * 
+     * @param text
+     *        the String to resolve
+     * @return the resolved String
+     * @see #PLACEHOLDER_PREFIX
+     * @see #PLACEHOLDER_SUFFIX
+     */
+    private static String resolvePlaceholders(String text) {
+        StringBuilder buf = new StringBuilder(text);
+
+        int startIndex = buf.indexOf(PLACEHOLDER_PREFIX);
+        while (startIndex != -1) {
+            int endIndex = buf.indexOf(PLACEHOLDER_SUFFIX, startIndex + PLACEHOLDER_PREFIX.length());
+            if (endIndex != -1) {
+                String placeholder = buf.substring(startIndex + PLACEHOLDER_PREFIX.length(), endIndex);
+                int nextIndex = endIndex + PLACEHOLDER_SUFFIX.length();
+                try {
+                    String propVal = System.getProperty(placeholder);
+                    if (propVal == null) {
+                        // Fall back to searching the system environment.
+                        propVal = System.getenv(placeholder);
+                    }
+                    if (propVal != null) {
+                        buf.replace(startIndex, endIndex + PLACEHOLDER_SUFFIX.length(), propVal);
+                        nextIndex = startIndex + propVal.length();
+                    } else {
+                        System.err.println("Could not resolve placeholder '" + placeholder + "' in [" + text
+                                + "] as system property: neither system property nor environment variable found");
+                    }
+                } catch (Throwable ex) {
+                    System.err.println("Could not resolve placeholder '" + placeholder + "' in [" + text
+                            + "] as system property: " + ex);
+                }
+                startIndex = buf.indexOf(PLACEHOLDER_PREFIX, nextIndex);
+            } else {
+                startIndex = -1;
+            }
+        }
+
+        return buf.toString();
     }
 
     /**
@@ -111,6 +294,19 @@ public final class Configuration {
      */
     public String get(String name) {
         return properties.getProperty(name);
+    }
+
+    /**
+     * Get the value of the <code>name</code> property,
+     * <code>defaultValue</code> if no such property exists.
+     * 
+     * @param name
+     * @param defaultValue
+     * @return
+     */
+    public String get(String name, String defaultValue) {
+        String ret = properties.getProperty(name);
+        return ret == null ? defaultValue : ret;
     }
 
     /**
@@ -366,6 +562,16 @@ public final class Configuration {
      */
     public void setOperationTimeout(int operationTimeout) {
         setInt(OPERATION_TIMEOUT, operationTimeout);
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return properties.toString();
     }
 
 }

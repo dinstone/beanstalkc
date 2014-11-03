@@ -16,10 +16,14 @@
 
 package com.dinstone.beanstalkc.internal;
 
+import java.util.Queue;
+
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.dinstone.beanstalkc.internal.operation.Operation;
 
 public class ConnectionHandler extends IoHandlerAdapter {
 
@@ -33,12 +37,20 @@ public class ConnectionHandler extends IoHandlerAdapter {
     @Override
     public void sessionClosed(IoSession session) throws Exception {
         LOG.info("Session[{}] is closed", session.getId());
+        Queue<Operation<?>> queue = SessionUtil.getOperationQueue(session);
+        while (true) {
+            Operation<?> operation = queue.poll();
+            if (operation == null) {
+                break;
+            }
+            operation.getOperationFuture().setException(new RuntimeException("connection is closed"));
+        }
     }
 
     @Override
     public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
         LOG.error("Unhandled Exception", cause);
-        SessionUtil.getConnection(session).destroy();
+        session.close(true);
     }
 
 }

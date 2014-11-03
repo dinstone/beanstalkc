@@ -32,7 +32,7 @@ public class BeanstalkClientTest {
 
     @Before
     public void setUp() throws Exception {
-        Configuration config = new Configuration();
+        Configuration config = new Configuration("default-configuration.xml");
         config.set("beanstalk.operation.timeout", "300000");
         client = new DefaultBeanstalkClient(config);
         client.useTube("br");
@@ -64,7 +64,7 @@ public class BeanstalkClientTest {
 
     @Test
     public void testPutJob01() {
-        long id = client.putJob(1, 0, 5000, new byte[1024 * 64-1]);
+        long id = client.putJob(1, 0, 5000, new byte[1024 * 64 - 1]);
         Assert.assertTrue(id != 0);
     }
 

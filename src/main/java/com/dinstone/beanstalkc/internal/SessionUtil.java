@@ -33,12 +33,4 @@ public class SessionUtil {
     public static void setOperationQueue(IoSession session) {
         session.setAttribute(Queue.class.getName(), new ConcurrentLinkedQueue<Operation<?>>());
     }
-
-    public static void setConnection(IoSession session, Connection connection) {
-        session.setAttribute(Connection.class.getName(), connection);
-    }
-
-    public static Connection getConnection(IoSession session) {
-        return (Connection) session.getAttribute(Connection.class.getName());
-    }
 }

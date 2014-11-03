@@ -33,9 +33,6 @@ public class PutOperation extends AbstractOperation<Long> {
         if (data == null) {
             throw new IllegalArgumentException("data is null");
         }
-        if (data.length > maxLength) {
-            throw new IllegalArgumentException("data is too long than " + maxLength);
-        }
         this.command = "put " + priority + " " + delay + " " + ttr + " " + data.length;
         this.data = data;
     }

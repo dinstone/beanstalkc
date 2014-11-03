@@ -72,9 +72,8 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
         }
         this.config = config;
 
-        this.operationTimeout = config.getLong(Configuration.OPERATION_TIMEOUT, 1);
-        AbstractOperation.maxLength = config.getJobMaxSize();
-        
+        this.operationTimeout = config.getOperationTimeout();
+
         ConnectionFactory factory = ConnectionFactory.getInstance();
         this.connection = factory.createConnection(config, initer);
     }
@@ -106,6 +105,11 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
      */
     @Override
     public long putJob(int priority, int delay, int ttr, byte[] data) {
+        int maxLength = config.getJobMaxSize();
+        if (data != null && data.length > maxLength) {
+            throw new IllegalArgumentException("data is too long than " + maxLength);
+        }
+
         AbstractOperation<Long> operation = new PutOperation(priority, delay, ttr, data);
         OperationFuture<Long> future = connection.handle(operation);
         try {

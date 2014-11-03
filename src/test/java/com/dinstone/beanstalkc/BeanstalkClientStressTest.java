@@ -26,7 +26,9 @@ public class BeanstalkClientStressTest {
 
     @Test
     public void testStrees00() {
-        DefaultBeanstalkClient client = new DefaultBeanstalkClient(new Configuration());
+        Configuration config = new Configuration("default-configuration.xml");
+        config.setServiceHost("localhost");
+        DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
 
@@ -49,7 +51,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
-        final Configuration config = new Configuration();
+        final Configuration config = new Configuration("default-configuration.xml");
         for (int i = 0; i < tc; i++) {
             Thread t = new Thread() {
 
@@ -98,7 +100,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
-        final Configuration config = new Configuration();
+        final Configuration config = new Configuration("default-configuration.xml");
         for (int i = 0; i < tc; i++) {
             Thread t = new Thread() {
 
@@ -147,7 +149,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
-        final Configuration config = new Configuration();
+        final Configuration config = new Configuration("default-configuration.xml");
         for (int i = 0; i < tc; i++) {
             Thread t = new Thread() {
 
@@ -196,7 +198,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
-        final Configuration config = new Configuration();
+        final Configuration config = new Configuration("default-configuration.xml");
         for (int i = 0; i < tc; i++) {
             Thread t = new Thread() {
 
@@ -245,7 +247,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
-        Configuration config = new Configuration();
+        Configuration config = new Configuration("default-configuration.xml");
         final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
@@ -294,7 +296,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
-        Configuration config = new Configuration();
+        Configuration config = new Configuration("default-configuration.xml");
         final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
@@ -343,7 +345,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
-        Configuration config = new Configuration();
+        Configuration config = new Configuration("default-configuration.xml");
         final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
@@ -392,7 +394,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
-        Configuration config = new Configuration();
+        Configuration config = new Configuration("default-configuration.xml");
         final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
@@ -441,7 +443,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
-        Configuration config = new Configuration();
+        Configuration config = new Configuration("default-configuration.xml");
         final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
@@ -490,7 +492,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
-        Configuration config = new Configuration();
+        Configuration config = new Configuration("default-configuration.xml");
         final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
@@ -535,11 +537,11 @@ public class BeanstalkClientStressTest {
      */
     @Test
     public void testStrees07() {
-        int tc = 300;
+        int tc = 12;
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         // create thread for test case
-        Configuration config = new Configuration();
+        Configuration config = new Configuration("default-configuration.xml");
         final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("someone");
         client.watchTube("someone");
@@ -612,7 +614,7 @@ public class BeanstalkClientStressTest {
 
     @Test
     public void testStreesPut00() {
-        Configuration config = new Configuration();
+        Configuration config = new Configuration("default-configuration.xml");
         final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("stress");
 
@@ -637,7 +639,7 @@ public class BeanstalkClientStressTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
 
-        Configuration config = new Configuration();
+        Configuration config = new Configuration("default-configuration.xml");
         final DefaultBeanstalkClient client = new DefaultBeanstalkClient(config);
         client.useTube("stress");
 

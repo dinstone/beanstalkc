@@ -57,7 +57,10 @@ public class OperationDecoder extends CumulativeProtocolDecoder {
     @Override
     protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
         Operation<?> operation = SessionUtil.getOperationQueue(session).peek();
-        
+        if (operation == null) {
+            throw new IllegalStateException("unknown command");
+        }
+
         int expect = operation.expect();
         if (expect == 0) {
             return parseStatusLine(session, in, out);

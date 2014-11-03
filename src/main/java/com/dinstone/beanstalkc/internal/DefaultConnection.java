@@ -16,8 +16,8 @@
 
 package com.dinstone.beanstalkc.internal;
 
-import java.util.Queue;
-
+import org.apache.mina.core.future.IoFutureListener;
+import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.session.IoSession;
 
 import com.dinstone.beanstalkc.internal.operation.Operation;
@@ -42,7 +42,19 @@ public class DefaultConnection implements Connection {
         connect();
 
         SessionUtil.getOperationQueue(ioSession).add(operation);
-        ioSession.write(operation);
+        WriteFuture writeFuture = ioSession.write(operation);
+        writeFuture.addListener(new IoFutureListener<WriteFuture>() {
+
+            @Override
+            public void operationComplete(WriteFuture future) {
+                if (!future.isWritten()) {
+                    if (ioSession != null) {
+                        SessionUtil.getOperationQueue(ioSession).remove(operation);
+                    }
+                    operation.getOperationFuture().setException(future.getException());
+                }
+            }
+        });
 
         return operation.getOperationFuture();
     }
@@ -56,15 +68,6 @@ public class DefaultConnection implements Connection {
     @Override
     public synchronized void destroy() {
         if (isConnected()) {
-            Queue<Operation<?>> queue = SessionUtil.getOperationQueue(ioSession);
-            while (true) {
-                Operation<?> operation = queue.poll();
-                if (operation == null) {
-                    break;
-                }
-                operation.getOperationFuture().setException(new RuntimeException("connection is closed"));
-            }
-
             ioSession.close(true);
         }
         ioSession = null;
@@ -77,7 +80,6 @@ public class DefaultConnection implements Connection {
 
         if (!isConnected()) {
             ioSession = connector.createSession();
-            SessionUtil.setConnection(ioSession, this);
             try {
                 if (initializer != null) {
                     initializer.initConnection(this);

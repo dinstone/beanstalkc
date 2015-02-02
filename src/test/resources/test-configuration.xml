@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+	<property>
+		<name>beanstalk.service.host</name>
+		<value>192.168.110.142</value>
+		<description>RPC server host,default is localhost.</description>
+	</property>
+	<property>
+		<name>beanstalk.service.port</name>
+		<value>11300</value>
+		<description>beanstalk server listen port,default is 11300</description>
+	</property>
+	<property>
+		<name>beanstalk.operation.timeout</name>
+		<value>10</value>
+		<description>10 seconds</description>
+	</property>
+	<property>
+		<name>beanstalk.job.maxSize</name>
+		<value>65535</value>
+		<description>default size is 65535</description>
+	</property>
+</configuration>

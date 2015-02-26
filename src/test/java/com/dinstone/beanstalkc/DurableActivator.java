@@ -1,17 +1,17 @@
 /*
- * Copyright (C) 2012~2013 dinstone<dinstone@163.com>
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * Copyright (C) 2012~2015 dinstone<dinstone@163.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.dinstone.beanstalkc;
@@ -47,7 +47,7 @@ public class DurableActivator {
 
         System.out.println("activator started");
         try {
-            Thread.sleep(3000);
+            Thread.sleep(30000000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -57,7 +57,10 @@ public class DurableActivator {
     }
 
     public void start() {
-        BeanstalkClientFactory factory = new BeanstalkClientFactory(new Configuration());
+        Configuration config = new Configuration();
+        config.setServiceHost("localhost");
+        config.setServicePort(11300);
+        BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         clear(factory);
 
         int scount = 3;

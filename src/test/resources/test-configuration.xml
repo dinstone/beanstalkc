@@ -2,7 +2,7 @@
 <configuration>
 	<property>
 		<name>beanstalk.service.host</name>
-		<value>192.168.110.142</value>
+		<value>localhost</value>
 		<description>RPC server host,default is localhost.</description>
 	</property>
 	<property>

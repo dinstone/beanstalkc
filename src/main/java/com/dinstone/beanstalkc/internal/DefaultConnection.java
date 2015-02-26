@@ -1,17 +1,17 @@
 /*
- * Copyright (C) 2012~2013 dinstone<dinstone@163.com>
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * Copyright (C) 2012~2015 dinstone<dinstone@163.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.dinstone.beanstalkc.internal;
@@ -20,6 +20,7 @@ import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.session.IoSession;
 
+import com.dinstone.beanstalkc.ConnectionException;
 import com.dinstone.beanstalkc.internal.operation.Operation;
 
 public class DefaultConnection implements Connection {
@@ -75,7 +76,7 @@ public class DefaultConnection implements Connection {
 
     private synchronized void connect() {
         if (closed) {
-            throw new RuntimeException("connection is closed");
+            throw new ConnectionException("connection is closed");
         }
 
         if (!isConnected()) {
@@ -91,7 +92,7 @@ public class DefaultConnection implements Connection {
                 if (e instanceof RuntimeException) {
                     throw (RuntimeException) e;
                 } else {
-                    throw new RuntimeException("can't init connection", e);
+                    throw new ConnectionException("can't init connection", e);
                 }
             }
         }

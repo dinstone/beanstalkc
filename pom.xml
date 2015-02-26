@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dinstone.beanstalkc</groupId>
 	<artifactId>beanstalk-client</artifactId>
@@ -15,7 +14,7 @@
 		<name>dinstone</name>
 		<url>www.dinstone.com</url>
 	</organization>
-	<inceptionYear>2012~2013</inceptionYear>
+	<inceptionYear>2012~2015</inceptionYear>
 	<developers>
 		<developer>
 			<name>dinstone</name>
@@ -28,42 +27,75 @@
 	</developers>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.source.version>1.5</java.source.version>
-		<java.target.version>1.5</java.target.version>
+		<java.source.version>1.6</java.source.version>
+		<java.target.version>1.6</java.target.version>
 	</properties>
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.google.code.maven-license-plugin</groupId>
+					<artifactId>maven-license-plugin</artifactId>
+					<version>1.4.0</version>
+					<configuration>
+						<header>license/ApacheV2.txt</header>
+						<includes>
+							<include>src/main/java/**</include>
+							<include>src/test/java/**</include>
+						</includes>
+						<properties>
+							<year>${project.inceptionYear}</year>
+							<owner>dinstone</owner>
+							<email>dinstone@163.com</email>
+						</properties>
+						<mapping>
+							<java>SLASHSTAR_STYLE</java>
+						</mapping>
+					</configuration>
+					<executions>
+						<execution>
+							<id>license-format</id>
+							<phase>validate</phase>
+							<goals>
+								<goal>format</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<plugin>
-				<groupId>com.google.code.maven-license-plugin</groupId>
-				<artifactId>maven-license-plugin</artifactId>
-				<version>1.4.0</version>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
 				<configuration>
-					<header>license/ApacheV2.txt</header>
-					<includes>
-						<include>src/main/java/**</include>
-						<include>src/test/java/**</include>
-					</includes>
-					<properties>
-						<year>${project.inceptionYear}</year>
-						<owner>dinstone</owner>
-						<email>dinstone@163.com</email>
-					</properties>
-					<mapping>
-						<java>SLASHSTAR_STYLE</java>
-					</mapping>
+					<encoding>UTF-8</encoding>
 				</configuration>
-				<executions>
-					<execution>
-						<id>license-format</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>format</goal>
-						</goals>
-					</execution>
-				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${java.source.version}</source>
+					<target>${java.target.version}</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>license</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.google.code.maven-license-plugin</groupId>
+						<artifactId>maven-license-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>

@@ -1,17 +1,17 @@
 /*
- * Copyright (C) 2012~2013 dinstone<dinstone@163.com>
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * Copyright (C) 2012~2015 dinstone<dinstone@163.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.dinstone.beanstalkc.internal.operation;
@@ -22,6 +22,8 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dinstone.beanstalkc.BadFormatException;
+import com.dinstone.beanstalkc.OutOfMemoryException;
 import com.dinstone.beanstalkc.internal.OperationFuture;
 
 public class PutOperation extends AbstractOperation<Long> {
@@ -64,11 +66,25 @@ public class PutOperation extends AbstractOperation<Long> {
                 return true;
             }
 
-            future.setException(new RuntimeException(line));
+            if (line.startsWith("BURIED")) {
+                future.setException(new OutOfMemoryException("this job is buried"));
+                return true;
+            }
+
+            if (line.startsWith("EXPECTED_CRLF")) {
+                future.setException(new BadFormatException("the job body must be followed by a CR-LF pair"));
+                return true;
+            }
+
+            if (line.startsWith("JOB_TOO_BIG")) {
+                future.setException(new BadFormatException("the job's size is larger than max-job-size bytes."));
+                return true;
+            }
+
+            exceptionHandler(line);
         } catch (Exception e) {
             future.setException(e);
         }
         return true;
     }
-
 }

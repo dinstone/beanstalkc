@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.dinstone.beanstalkc.internal;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+package com.dinstone.beanstalkc.internal;
 
 import com.dinstone.beanstalkc.Configuration;
 
@@ -27,92 +24,49 @@ import com.dinstone.beanstalkc.Configuration;
  */
 public class ConnectorKey {
 
-    private static final String[] CONNECTION_PROPERTIES = { Configuration.SERVICE_HOST, Configuration.SERVICE_PORT };
+    private String host;
 
-    private Map<String, String> properties;
+    private int port;
 
     /**
      * @param config
      */
     public ConnectorKey(Configuration config) {
-        Map<String, String> m = new HashMap<String, String>();
-        if (config != null) {
-            for (String property : CONNECTION_PROPERTIES) {
-                String value = config.get(property);
-                if (value != null) {
-                    m.put(property, value);
-                }
-            }
-        }
-
-        this.properties = Collections.unmodifiableMap(m);
+        this.host = config.getServiceHost();
+        this.port = config.getServicePort();
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        for (String property : CONNECTION_PROPERTIES) {
-            String value = properties.get(property);
-            if (value != null) {
-                result = prime * result + value.hashCode();
-            }
-        }
+        result = prime * result + ((host == null) ? 0 : host.hashCode());
+        result = prime * result + port;
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (obj == null) {
+        if (obj == null)
             return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (getClass() != obj.getClass())
             return false;
-        }
         ConnectorKey other = (ConnectorKey) obj;
-        if (this.properties == null) {
-            if (other.properties != null) {
+        if (host == null) {
+            if (other.host != null)
                 return false;
-            }
-        } else if (other.properties == null) {
+        } else if (!host.equals(other.host))
             return false;
-        } else {
-            for (String property : CONNECTION_PROPERTIES) {
-                String thisValue = this.properties.get(property);
-                String thatValue = other.properties.get(property);
-                if (thisValue == thatValue) {
-                    continue;
-                }
-                if (thisValue == null || !thisValue.equals(thatValue)) {
-                    return false;
-                }
-            }
-        }
-
+        if (port != other.port)
+            return false;
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
-        return "ConnectorKey{properties=" + properties + "}";
+        return "ConnectorKey [host=" + host + ", port=" + port + "]";
     }
 
 }

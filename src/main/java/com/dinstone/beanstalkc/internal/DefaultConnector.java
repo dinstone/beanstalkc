@@ -70,7 +70,7 @@ public class DefaultConnector implements Connector {
         // add filter
         DefaultIoFilterChainBuilder chainBuilder = ioConnector.getFilterChain();
 
-        String charsetName = config.get("beanstalk.protocol.charset");
+        String charsetName = config.getProtocolCharset();
         Charset charset = Charset.forName(charsetName == null ? "ASCII" : charsetName);
         LOG.debug("beanstalk.protocol.charset is {}", charset);
 

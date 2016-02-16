@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.dinstone.beanstalkc;
 
 import java.io.IOException;
@@ -61,10 +62,12 @@ public class Configuration {
     public static final String SERVICE_PORT = "beanstalk.service.port";
 
     /** operation timeout ({@link TimeUnit.MILLISECONDS}) */
-    public static final String OPERATION_TIMEOUT = "beanstalk.operation.timeout";
+    private static final String OPERATION_TIMEOUT = "beanstalk.operation.timeout";
 
     /** max job size */
-    public static final String JOB_MAXSIZE = "beanstalk.job.maxSize";
+    private static final String JOB_MAXSIZE = "beanstalk.job.maxSize";
+
+    private static final String PROTOCOL_CHARSET = "beanstalk.protocol.charset";
 
     private final Properties properties = new Properties();
 
@@ -240,8 +243,7 @@ public class Configuration {
     }
 
     /**
-     * Resolve ${...} placeholders in the given text, replacing them with
-     * corresponding system property values.
+     * Resolve ${...} placeholders in the given text, replacing them with corresponding system property values.
      * 
      * @param text
      *        the String to resolve
@@ -285,25 +287,23 @@ public class Configuration {
     }
 
     /**
-     * Get the value of the <code>name</code> property, <code>null</code> if no
-     * such property exists.
+     * Get the value of the <code>name</code> property, <code>null</code> if no such property exists.
      * 
      * @param name
      * @return
      */
-    public String get(String name) {
+    protected String get(String name) {
         return properties.getProperty(name);
     }
 
     /**
-     * Get the value of the <code>name</code> property,
-     * <code>defaultValue</code> if no such property exists.
+     * Get the value of the <code>name</code> property, <code>defaultValue</code> if no such property exists.
      * 
      * @param name
      * @param defaultValue
      * @return
      */
-    public String get(String name, String defaultValue) {
+    protected String get(String name, String defaultValue) {
         String ret = properties.getProperty(name);
         return ret == null ? defaultValue : ret;
     }
@@ -316,20 +316,19 @@ public class Configuration {
      * @param value
      *        property value.
      */
-    public void set(String name, String value) {
+    protected void set(String name, String value) {
         properties.setProperty(name, value);
     }
 
     /**
-     * Get the value of the <code>name</code> property as an <code>int</code>.
-     * If no such property exists, or if the specified value is not a valid
-     * <code>int</code>, then <code>defaultValue</code> is returned.
+     * Get the value of the <code>name</code> property as an <code>int</code>. If no such property exists, or if the
+     * specified value is not a valid <code>int</code>, then <code>defaultValue</code> is returned.
      * 
      * @param name
      * @param defaultValue
      * @return
      */
-    public int getInt(String name, int defaultValue) {
+    protected int getInt(String name, int defaultValue) {
         String valueString = get(name);
         if (valueString == null) {
             return defaultValue;
@@ -353,23 +352,21 @@ public class Configuration {
      * @param value
      *        <code>int</code> value of the property.
      */
-    public void setInt(String name, int value) {
+    protected void setInt(String name, int value) {
         set(name, Integer.toString(value));
     }
 
     /**
-     * Get the value of the <code>name</code> property as a <code>long</code>.
-     * If no such property is specified, or if the specified value is not a
-     * valid <code>long</code>, then <code>defaultValue</code> is returned.
+     * Get the value of the <code>name</code> property as a <code>long</code>. If no such property is specified, or if
+     * the specified value is not a valid <code>long</code>, then <code>defaultValue</code> is returned.
      * 
      * @param name
      *        property name.
      * @param defaultValue
      *        default value.
-     * @return property value as a <code>long</code>, or
-     *         <code>defaultValue</code>.
+     * @return property value as a <code>long</code>, or <code>defaultValue</code>.
      */
-    public long getLong(String name, long defaultValue) {
+    protected long getLong(String name, long defaultValue) {
         String valueString = get(name);
         if (valueString == null) {
             return defaultValue;
@@ -393,7 +390,7 @@ public class Configuration {
      * @param value
      *        <code>long</code> value of the property.
      */
-    public void setLong(String name, long value) {
+    protected void setLong(String name, long value) {
         set(name, Long.toString(value));
     }
 
@@ -416,18 +413,16 @@ public class Configuration {
     }
 
     /**
-     * Get the value of the <code>name</code> property as a <code>float</code>.
-     * If no such property is specified, or if the specified value is not a
-     * valid <code>float</code>, then <code>defaultValue</code> is returned.
+     * Get the value of the <code>name</code> property as a <code>float</code>. If no such property is specified, or if
+     * the specified value is not a valid <code>float</code>, then <code>defaultValue</code> is returned.
      * 
      * @param name
      *        property name.
      * @param defaultValue
      *        default value.
-     * @return property value as a <code>float</code>, or
-     *         <code>defaultValue</code>.
+     * @return property value as a <code>float</code>, or <code>defaultValue</code>.
      */
-    public float getFloat(String name, float defaultValue) {
+    protected float getFloat(String name, float defaultValue) {
         String valueString = get(name);
         if (valueString == null) {
             return defaultValue;
@@ -447,23 +442,21 @@ public class Configuration {
      * @param value
      *        property value.
      */
-    public void setFloat(String name, float value) {
+    protected void setFloat(String name, float value) {
         set(name, Float.toString(value));
     }
 
     /**
-     * Get the value of the <code>name</code> property as a <code>boolean</code>
-     * . If no such property is specified, or if the specified value is not a
-     * valid <code>boolean</code>, then <code>defaultValue</code> is returned.
+     * Get the value of the <code>name</code> property as a <code>boolean</code> . If no such property is specified, or
+     * if the specified value is not a valid <code>boolean</code>, then <code>defaultValue</code> is returned.
      * 
      * @param name
      *        property name.
      * @param defaultValue
      *        default value.
-     * @return property value as a <code>boolean</code>, or
-     *         <code>defaultValue</code>.
+     * @return property value as a <code>boolean</code>, or <code>defaultValue</code>.
      */
-    public boolean getBoolean(String name, boolean defaultValue) {
+    protected boolean getBoolean(String name, boolean defaultValue) {
         String valueString = get(name);
         if ("true".equals(valueString)) {
             return true;
@@ -475,15 +468,14 @@ public class Configuration {
     }
 
     /**
-     * Set the value of the <code>name</code> property to a <code>boolean</code>
-     * .
+     * Set the value of the <code>name</code> property to a <code>boolean</code> .
      * 
      * @param name
      *        property name.
      * @param value
      *        <code>boolean</code> value of the property.
      */
-    public void setBoolean(String name, boolean value) {
+    protected void setBoolean(String name, boolean value) {
         set(name, Boolean.toString(value));
     }
 
@@ -561,6 +553,10 @@ public class Configuration {
      */
     public void setOperationTimeout(int operationTimeout) {
         setInt(OPERATION_TIMEOUT, operationTimeout);
+    }
+
+    public String getProtocolCharset() {
+        return get(PROTOCOL_CHARSET, "ASCII");
     }
 
     /**

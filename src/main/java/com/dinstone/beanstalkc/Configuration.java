@@ -56,10 +56,10 @@ public class Configuration {
     private static final String PLACEHOLDER_SUFFIX = "}";
 
     /** beanstalk service host name */
-    public static final String SERVICE_HOST = "beanstalk.service.host";
+    private static final String SERVICE_HOST = "beanstalk.service.host";
 
     /** beanstalk service port */
-    public static final String SERVICE_PORT = "beanstalk.service.port";
+    private static final String SERVICE_PORT = "beanstalk.service.port";
 
     /** operation timeout ({@link TimeUnit.MILLISECONDS}) */
     private static final String OPERATION_TIMEOUT = "beanstalk.operation.timeout";
@@ -78,7 +78,7 @@ public class Configuration {
     }
 
     public Configuration(Configuration other) {
-        this.properties.putAll(other.properties);
+        merge(other);
     }
 
     /**
@@ -89,6 +89,13 @@ public class Configuration {
             throw new IllegalArgumentException("configLocation is null");
         }
         loadConfiguration(configLocation);
+    }
+
+    public Configuration merge(Configuration other) {
+        if (other != null) {
+            this.properties.putAll(other.properties);
+        }
+        return this;
     }
 
     public void writeConfiguration(OutputStream out) {
@@ -498,7 +505,7 @@ public class Configuration {
     }
 
     /**
-     * get service port
+     * get service port,default is 11300.
      * 
      * @return
      */
@@ -516,10 +523,9 @@ public class Configuration {
     }
 
     /**
-     * the jobMaxSize to get
+     * the jobMaxSize to get,default is 65536.
      * 
      * @return the jobMaxSize
-     * @see Configuration#jobMaxSize
      */
     public int getJobMaxSize() {
         return getInt(JOB_MAXSIZE, 65536);
@@ -536,7 +542,7 @@ public class Configuration {
     }
 
     /**
-     * the operationTimeout to get
+     * the operationTimeout to get,default is 10 seconds.
      * 
      * @return the operationTimeout
      * @see Configuration#operationTimeout
@@ -555,6 +561,11 @@ public class Configuration {
         setInt(OPERATION_TIMEOUT, operationTimeout);
     }
 
+    /**
+     * protocol charset is 'ASCII'.
+     * 
+     * @return
+     */
     public String getProtocolCharset() {
         return get(PROTOCOL_CHARSET, "ASCII");
     }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.dinstone.beanstalkc.internal.operation;
 
 import java.nio.charset.Charset;
@@ -35,9 +36,6 @@ import com.dinstone.beanstalkc.internal.OperationFuture;
  * @version 1.0.0.2013-4-11
  */
 public class AbstractOperation<R> implements Operation<R> {
-
-    /** default is 2^16 */
-    public static int maxLength = 64 * 1024;
 
     protected final OperationFuture<R> future;
 

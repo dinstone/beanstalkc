@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.dinstone.beanstalkc;
 
 import com.dinstone.beanstalkc.internal.Connection;
@@ -23,15 +24,21 @@ import com.dinstone.beanstalkc.internal.operation.UseOperation;
 import com.dinstone.beanstalkc.internal.operation.WatchOperation;
 
 /**
- * {@link BeanstalkClientFactory} is a factory class, that is responsible for
- * the creation beanstalk client.
+ * {@link BeanstalkClientFactory} is a factory class, that is responsible for the creation beanstalk client.
  * 
  * @author guojf
  * @version 2.0.0.2013-4-17
  */
 public class BeanstalkClientFactory {
 
-    private Configuration config;
+    private Configuration configuration = new Configuration();
+
+    /**
+     * default factory construction.
+     */
+    public BeanstalkClientFactory() {
+        super();
+    }
 
     /**
      * factory construction.
@@ -43,7 +50,7 @@ public class BeanstalkClientFactory {
         if (config == null) {
             throw new IllegalArgumentException("config is null");
         }
-        this.config = config;
+        this.configuration.merge(config);
     }
 
     /**
@@ -52,7 +59,7 @@ public class BeanstalkClientFactory {
      * @return
      */
     public BeanstalkClient createBeanstalkClient() {
-        return new DefaultBeanstalkClient(config, null);
+        return new DefaultBeanstalkClient(configuration, null);
     }
 
     /**
@@ -63,7 +70,7 @@ public class BeanstalkClientFactory {
      * @return a beanstalk client
      */
     public JobConsumer createJobConsumer(final String... watchTubes) {
-        final boolean ignoreDefault = config.getBoolean("IgnoreDefaultTube", false);
+        final boolean ignoreDefault = configuration.getBoolean("IgnoreDefaultTube", false);
         ConnectionInitializer initer = new ConnectionInitializer() {
 
             @Override
@@ -79,7 +86,7 @@ public class BeanstalkClientFactory {
                 }
             }
         };
-        return new DefaultBeanstalkClient(config, initer);
+        return new DefaultBeanstalkClient(configuration, initer);
     }
 
     /**
@@ -99,6 +106,11 @@ public class BeanstalkClientFactory {
                 }
             }
         };
-        return new DefaultBeanstalkClient(config, initer);
+        return new DefaultBeanstalkClient(configuration, initer);
     }
+
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+
 }

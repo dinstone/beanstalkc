@@ -40,7 +40,7 @@ public class ReserveOperation extends AbstractOperation<Job> {
     public ReserveOperation(long timeout) {
         super(new OperationFuture<Job>());
 
-        if (timeout > 0) {
+        if (timeout >= 0) {
             this.command = "reserve-with-timeout " + timeout;
         } else {
             this.command = "reserve";

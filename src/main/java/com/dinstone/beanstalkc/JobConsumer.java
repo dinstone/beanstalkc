@@ -36,7 +36,7 @@ public interface JobConsumer {
      * available.
      * 
      * @param timeout
-     *        if timeout>0,then with reserve-with-timeout command.
+     *        if timeout >= 0, then with reserve-with-timeout command.
      * @return
      */
     public Job reserveJob(long timeout);

@@ -33,12 +33,12 @@ public class BeanstalkClientStressTest {
 
         long st = System.currentTimeMillis();
 
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 30; i++) {
             fun(client, i);
         }
 
         long et = System.currentTimeMillis();
-        System.out.println("common case[1thread * 300time=300] takes " + (et - st) + "ms");
+        System.out.println("common case[1thread * 30time=30] takes " + (et - st) + "ms");
     }
 
     /**

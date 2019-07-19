@@ -42,7 +42,7 @@ import com.dinstone.beanstalkc.internal.operation.WatchOperation;
 
 /**
  * This is the client implementation of the beanstalkd protocol.
- * 
+ *
  * @author guojf
  * @version 1.0.0.2013-4-11
  */
@@ -73,8 +73,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
         this.operationTimeout = config.getOperationTimeout();
 
-        ConnectionFactory factory = ConnectionFactory.getInstance();
-        this.connection = factory.createConnection(config, initer);
+        this.connection = ConnectionFactory.getInstance().createConnection(config, initer);
     }
 
     // ************************************************************************
@@ -83,12 +82,11 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * The "use" command is for producers. Subsequent put commands will put jobs
-     * into the tube specified by this command. If no use command has been
-     * issued, jobs will be put into the tube named "default".
-     * 
-     * @param tube
-     *        is a name at most 200 bytes. It specifies the tube to use. If the
-     *        tube does not exist, it will be created.
+     * into the tube specified by this command. If no use command has been issued,
+     * jobs will be put into the tube named "default".
+     *
+     * @param tube is a name at most 200 bytes. It specifies the tube to use. If the
+     *             tube does not exist, it will be created.
      * @return
      */
     @Override
@@ -99,7 +97,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.dinstone.beanstalkc.JobProducer#putJob(int, int, int, byte[])
      */
     @Override
@@ -133,10 +131,10 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * The "watch" command adds the named tube to the watch list for the current
-     * connection. A reserve command will take a job from any of the tubes in
-     * the watch list. For each new connection, the watch list initially
-     * consists of one tube, named "default".
-     * 
+     * connection. A reserve command will take a job from any of the tubes in the
+     * watch list. For each new connection, the watch list initially consists of one
+     * tube, named "default".
+     *
      * @param tube
      * @return
      */
@@ -153,14 +151,13 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
     }
 
     /**
-     * The "touch" command allows a worker to request more time to work on a
-     * job. This is useful for jobs that potentially take a long time, but you
-     * still want the benefits of a TTR pulling a job away from an unresponsive
-     * worker. A worker may periodically tell the server that it's still alive
-     * and processing a job (e.g. it may do this on DEADLINE_SOON).
-     * 
-     * @param id
-     *        is the ID of a job reserved by the current connection.
+     * The "touch" command allows a worker to request more time to work on a job.
+     * This is useful for jobs that potentially take a long time, but you still want
+     * the benefits of a TTR pulling a job away from an unresponsive worker. A
+     * worker may periodically tell the server that it's still alive and processing
+     * a job (e.g. it may do this on DEADLINE_SOON).
+     *
+     * @param id is the ID of a job reserved by the current connection.
      * @return
      */
     @Override
@@ -196,9 +193,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
     @Override
     public void close() {
         connection.close();
-
-        ConnectionFactory factory = ConnectionFactory.getInstance();
-        factory.releaseConnection(config);
+        ConnectionFactory.getInstance().releaseConnection(config);
     }
 
     public void quit() {
@@ -223,7 +218,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.dinstone.beanstalkc.BeanstalkClient#kick(long)
      */
     @Override
@@ -239,7 +234,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.dinstone.beanstalkc.BeanstalkClient#peek(long)
      */
     @Override
@@ -255,7 +250,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.dinstone.beanstalkc.BeanstalkClient#peekReady()
      */
     @Override
@@ -271,7 +266,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.dinstone.beanstalkc.BeanstalkClient#peekDelayed()
      */
     @Override
@@ -287,7 +282,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.dinstone.beanstalkc.BeanstalkClient#peekBuried()
      */
     @Override
@@ -303,7 +298,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.dinstone.beanstalkc.BeanstalkClient#statsJob(long)
      */
     @Override
@@ -319,7 +314,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.dinstone.beanstalkc.BeanstalkClient#statsTube(java.lang.String)
      */
     @Override
@@ -335,7 +330,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.dinstone.beanstalkc.BeanstalkClient#stats()
      */
     @Override
@@ -351,7 +346,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.dinstone.beanstalkc.BeanstalkClient#listTubes()
      */
     @Override
@@ -367,7 +362,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.dinstone.beanstalkc.BeanstalkClient#listTubeUsed()
      */
     @Override
@@ -383,7 +378,7 @@ public class DefaultBeanstalkClient implements BeanstalkClient {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.dinstone.beanstalkc.BeanstalkClient#listTubeWatched()
      */
     @Override

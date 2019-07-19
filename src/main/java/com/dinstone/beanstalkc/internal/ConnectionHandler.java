@@ -18,6 +18,7 @@ package com.dinstone.beanstalkc.internal;
 import java.util.Queue;
 
 import org.apache.mina.core.service.IoHandlerAdapter;
+import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,30 +28,37 @@ import com.dinstone.beanstalkc.internal.operation.Operation;
 
 public class ConnectionHandler extends IoHandlerAdapter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ConnectionHandler.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ConnectionHandler.class);
 
-    @Override
-    public void sessionCreated(IoSession session) throws Exception {
-        SessionUtil.setOperationQueue(session);
-    }
+	@Override
+	public void sessionCreated(IoSession session) throws Exception {
+		SessionUtil.setOperationQueue(session);
+	}
 
-    @Override
-    public void sessionClosed(IoSession session) throws Exception {
-        LOG.info("Session[{}] is closed", session.getId());
-        Queue<Operation<?>> queue = SessionUtil.getOperationQueue(session);
-        while (true) {
-            Operation<?> operation = queue.poll();
-            if (operation == null) {
-                break;
-            }
-            operation.getOperationFuture().setException(new ConnectionException("connection is closed"));
-        }
-    }
+	@Override
+	public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
+		if (status == IdleStatus.READER_IDLE) {
+			session.close(true);
+		}
+	}
 
-    @Override
-    public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
-        LOG.error("Unhandled Exception", cause);
-        session.close(true);
-    }
+	@Override
+	public void sessionClosed(IoSession session) throws Exception {
+		LOG.info("Session[{}] is closed", session.getId());
+		Queue<Operation<?>> queue = SessionUtil.getOperationQueue(session);
+		while (true) {
+			Operation<?> operation = queue.poll();
+			if (operation == null) {
+				break;
+			}
+			operation.getOperationFuture().setException(new ConnectionException("connection is closed"));
+		}
+	}
+
+	@Override
+	public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
+		LOG.error("Unhandled Exception", cause);
+		session.close(true);
+	}
 
 }

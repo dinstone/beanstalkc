@@ -16,34 +16,31 @@
 package com.dinstone.beanstalkc;
 
 /**
- * The server cannot allocate enough memory for the job. The client should try again later.
+ * The server cannot allocate enough memory for the job. The client should try
+ * again later.
  * 
  * @author guojinfei
  * @version 1.0.0
  */
 public class OutOfMemoryException extends RuntimeException {
 
-    /**  */
-    private static final long serialVersionUID = 1L;
+	/**  */
+	private static final long serialVersionUID = 1L;
 
-    public OutOfMemoryException() {
-        super();
-    }
+	public OutOfMemoryException() {
+		super();
+	}
 
-    public OutOfMemoryException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+	public OutOfMemoryException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    public OutOfMemoryException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public OutOfMemoryException(String message) {
+		super(message);
+	}
 
-    public OutOfMemoryException(String message) {
-        super(message);
-    }
-
-    public OutOfMemoryException(Throwable cause) {
-        super(cause);
-    }
+	public OutOfMemoryException(Throwable cause) {
+		super(cause);
+	}
 
 }

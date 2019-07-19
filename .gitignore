@@ -1,2 +1,7 @@
 /logs
 /target
+/.classpath
+/.project
+/.settings
+/beanstalkc.iml
+/.idea

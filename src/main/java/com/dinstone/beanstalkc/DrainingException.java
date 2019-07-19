@@ -16,34 +16,31 @@
 package com.dinstone.beanstalkc;
 
 /**
- * This means that the server has been put into "drain mode" and is no longer accepting new jobs. The client should try
- * another server or disconnect and try again later.
+ * This means that the server has been put into "drain mode" and is no longer
+ * accepting new jobs. The client should try another server or disconnect and
+ * try again later.
  * 
  * @author guojinfei
  * @version 1.0.0
  */
 public class DrainingException extends RuntimeException {
 
-    /**  */
-    private static final long serialVersionUID = 1L;
+	/**  */
+	private static final long serialVersionUID = 1L;
 
-    public DrainingException() {
-    }
+	public DrainingException() {
+	}
 
-    public DrainingException(String message) {
-        super(message);
-    }
+	public DrainingException(String message) {
+		super(message);
+	}
 
-    public DrainingException(Throwable cause) {
-        super(cause);
-    }
+	public DrainingException(Throwable cause) {
+		super(cause);
+	}
 
-    public DrainingException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public DrainingException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+	public DrainingException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
 }

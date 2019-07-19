@@ -38,6 +38,7 @@ public class JobProducerConsumerTest {
     @Before
     public void setUp() throws Exception {
         Configuration config = new Configuration();
+        config.setServiceHost("127.0.0.1");
         BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         producer = factory.createJobProducer("pctube");
         consumer = factory.createJobConsumer("pctube");
@@ -82,6 +83,7 @@ public class JobProducerConsumerTest {
     public void testStrees001() {
         Configuration config = new Configuration();
         config.setBoolean("IgnoreDefaultTube", true);
+        config.setServiceHost("127.0.0.1");
         BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         JobConsumer consumer = factory.createJobConsumer((String[]) null);
         Job job = consumer.reserveJob(1);
@@ -92,6 +94,7 @@ public class JobProducerConsumerTest {
     public void testStrees002() {
         Configuration config = new Configuration();
         config.setBoolean("IgnoreDefaultTube", true);
+        config.setServiceHost("127.0.0.1");
         BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         JobProducer producer = factory.createJobProducer(null);
         producer.putJob(1, 1, 5000, "dddd".getBytes());
@@ -130,6 +133,7 @@ public class JobProducerConsumerTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         final Configuration config = new Configuration();
+        config.setServiceHost("127.0.0.1");
         final BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         // create thread for test case
         for (int i = 0; i < tc; i++) {
@@ -178,6 +182,7 @@ public class JobProducerConsumerTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         final Configuration config = new Configuration();
+        config.setServiceHost("127.0.0.1");
         final BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         // create thread for test case
         for (int i = 0; i < tc; i++) {
@@ -226,6 +231,7 @@ public class JobProducerConsumerTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         final Configuration config = new Configuration();
+        config.setServiceHost("127.0.0.1");
         final BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         // create thread for test case
         for (int i = 0; i < tc; i++) {
@@ -274,6 +280,7 @@ public class JobProducerConsumerTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         final Configuration config = new Configuration();
+        config.setServiceHost("127.0.0.1");
         final BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         // create thread for test case
         for (int i = 0; i < tc; i++) {
@@ -498,6 +505,7 @@ public class JobProducerConsumerTest {
         final CountDownLatch doneLatch = new CountDownLatch(tc);
         final CountDownLatch startLatch = new CountDownLatch(1);
         final Configuration config = new Configuration();
+        config.setServiceHost("127.0.0.1");
         final BeanstalkClientFactory factory = new BeanstalkClientFactory(config);
         // create thread for test case
         for (int i = 0; i < tc; i++) {

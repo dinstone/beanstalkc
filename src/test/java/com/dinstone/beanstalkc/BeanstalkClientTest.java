@@ -139,7 +139,7 @@ public class BeanstalkClientTest {
     @Test
     public void testKick() {
         long kicked = client.kick(2);
-        Assert.assertEquals(0, kicked);
+        Assert.assertEquals(1, kicked);
     }
 
     @Test

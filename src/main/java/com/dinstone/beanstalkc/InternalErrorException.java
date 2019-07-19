@@ -16,35 +16,31 @@
 package com.dinstone.beanstalkc;
 
 /**
- * This indicates a bug in the server. It should never happen. If it does happen, please report it at
- * http://groups.google.com/group/beanstalk-talk.
+ * This indicates a bug in the server. It should never happen. If it does
+ * happen, please report it at http://groups.google.com/group/beanstalk-talk.
  * 
  * @author guojinfei
  * @version 1.0.0
  */
 public class InternalErrorException extends RuntimeException {
 
-    /**  */
-    private static final long serialVersionUID = 1L;
+	/**  */
+	private static final long serialVersionUID = 1L;
 
-    public InternalErrorException() {
-        super();
-    }
+	public InternalErrorException() {
+		super();
+	}
 
-    public InternalErrorException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+	public InternalErrorException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    public InternalErrorException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public InternalErrorException(String message) {
+		super(message);
+	}
 
-    public InternalErrorException(String message) {
-        super(message);
-    }
-
-    public InternalErrorException(Throwable cause) {
-        super(cause);
-    }
+	public InternalErrorException(Throwable cause) {
+		super(cause);
+	}
 
 }

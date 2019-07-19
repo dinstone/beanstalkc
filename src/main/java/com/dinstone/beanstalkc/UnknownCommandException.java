@@ -23,46 +23,35 @@ package com.dinstone.beanstalkc;
  */
 public class UnknownCommandException extends RuntimeException {
 
-    /**  */
-    private static final long serialVersionUID = 1L;
+	/**  */
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * 
-     */
-    public UnknownCommandException() {
-    }
+	/**
+	 * 
+	 */
+	public UnknownCommandException() {
+	}
 
-    /**
-     * @param message
-     */
-    public UnknownCommandException(String message) {
-        super(message);
-    }
+	/**
+	 * @param message
+	 */
+	public UnknownCommandException(String message) {
+		super(message);
+	}
 
-    /**
-     * @param cause
-     */
-    public UnknownCommandException(Throwable cause) {
-        super(cause);
-    }
+	/**
+	 * @param cause
+	 */
+	public UnknownCommandException(Throwable cause) {
+		super(cause);
+	}
 
-    /**
-     * @param message
-     * @param cause
-     */
-    public UnknownCommandException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    /**
-     * @param message
-     * @param cause
-     * @param enableSuppression
-     * @param writableStackTrace
-     */
-    public UnknownCommandException(String message, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+	/**
+	 * @param message
+	 * @param cause
+	 */
+	public UnknownCommandException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
 }

@@ -60,8 +60,14 @@ public class Configuration {
     /** beanstalk service port */
     private static final String SERVICE_PORT = "beanstalk.service.port";
 
-    /** operation timeout ({@link TimeUnit.MILLISECONDS}) */
+    /** operation timeout ({@link TimeUnit.SECONDS}) */
     private static final String OPERATION_TIMEOUT = "beanstalk.operation.timeout";
+
+    /** connect timeout ({@link TimeUnit.MILLISECONDS}) */
+    private static final String CONNECT_TIMEOUT = "beanstalk.connect.timeout";
+
+    /** read timeout ({@link TimeUnit.MILLISECONDS}) */
+    private static final String READ_TIMEOUT = "beanstalk.read.timeout";
 
     /** max job size */
     private static final String JOB_MAXSIZE = "beanstalk.job.maxSize";
@@ -558,6 +564,46 @@ public class Configuration {
      */
     public void setOperationTimeout(int operationTimeout) {
         setInt(OPERATION_TIMEOUT, operationTimeout);
+    }
+
+    /**
+     * the connect timeout to get,default is 3 seconds.
+     *
+     * @return the CONNECT_TIMEOUT
+     * @see Configuration#CONNECT_TIMEOUT
+     */
+    public int getConnectTimeout() {
+        return getInt(CONNECT_TIMEOUT, 3000);
+    }
+
+    /**
+     * the connect timeout to set
+     *
+     * @param timeout
+     * @see Configuration#CONNECT_TIMEOUT
+     */
+    public void setConnectTimeout(int timeout) {
+        setInt(CONNECT_TIMEOUT, timeout);
+    }
+
+    /**
+     * the read timeout to get,default is 3 seconds.
+     *
+     * @return the READ_TIMEOUT
+     * @see Configuration#READ_TIMEOUT
+     */
+    public int getReadTimeout() {
+        return getInt(READ_TIMEOUT, 3000);
+    }
+
+    /**
+     * the read timeout to set
+     *
+     * @param timeout
+     * @see Configuration#READ_TIMEOUT
+     */
+    public void setReadTimeout(int timeout) {
+        setInt(READ_TIMEOUT, timeout);
     }
 
     /**

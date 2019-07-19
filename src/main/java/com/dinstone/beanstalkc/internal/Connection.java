@@ -38,9 +38,4 @@ public interface Connection {
      */
     public void close();
 
-    /**
-     * release to the operation of the current connection.
-     */
-    public void destroy();
-
 }

@@ -29,12 +29,11 @@ public interface BeanstalkClient extends JobConsumer, JobProducer {
 
     /**
      * The "use" command is for producers. Subsequent put commands will put jobs
-     * into the tube specified by this command. If no use command has been
-     * issued, jobs will be put into the tube named "default".
+     * into the tube specified by this command. If no use command has been issued,
+     * jobs will be put into the tube named "default".
      * 
-     * @param tube
-     *        is a name at most 200 bytes. It specifies the tube to use. If the
-     *        tube does not exist, it will be created.
+     * @param tube is a name at most 200 bytes. It specifies the tube to use. If the
+     *             tube does not exist, it will be created.
      * @return
      */
     public boolean useTube(String tube);
@@ -43,17 +42,16 @@ public interface BeanstalkClient extends JobConsumer, JobProducer {
      * The "ignore" command is for consumers. It removes the named tube from the
      * watch list for the current connection.
      * 
-     * @param tube
-     *        is a name at most 200 bytes.
+     * @param tube is a name at most 200 bytes.
      * @return
      */
     public boolean ignoreTube(String tube);
 
     /**
      * The "watch" command adds the named tube to the watch list for the current
-     * connection. A reserve command will take a job from any of the tubes in
-     * the watch list. For each new connection, the watch list initially
-     * consists of one tube, named "default".
+     * connection. A reserve command will take a job from any of the tubes in the
+     * watch list. For each new connection, the watch list initially consists of one
+     * tube, named "default".
      * 
      * @param tube
      * @return
@@ -61,9 +59,9 @@ public interface BeanstalkClient extends JobConsumer, JobProducer {
     public boolean watchTube(String tube);
 
     /**
-     * The kick command applies only to the currently used tube. It moves jobs
-     * into the ready queue. If there are any buried jobs, it will only kick
-     * buried jobs. Otherwise it will kick delayed jobs.
+     * The kick command applies only to the currently used tube. It moves jobs into
+     * the ready queue. If there are any buried jobs, it will only kick buried jobs.
+     * Otherwise it will kick delayed jobs.
      * 
      * @param bound
      * @return
@@ -79,8 +77,8 @@ public interface BeanstalkClient extends JobConsumer, JobProducer {
     public Job peek(long jobId);
 
     /**
-     * The peek commands let the client inspect a job in the system, return the
-     * next ready job.
+     * The peek commands let the client inspect a job in the system, return the next
+     * ready job.
      * 
      * @return
      */
@@ -95,28 +93,28 @@ public interface BeanstalkClient extends JobConsumer, JobProducer {
     public Job peekDelayed();
 
     /**
-     * The peek commands let the client inspect a job in the system, return the
-     * next job in the list of buried jobs.
+     * The peek commands let the client inspect a job in the system, return the next
+     * job in the list of buried jobs.
      * 
      * @return
      */
     public Job peekBuried();
 
     /**
-     * The stats-job command gives statistical information about the specified
-     * job if it exists.<br>
-     * The stats-job data is a YAML file representing a single dictionary of
-     * strings to scalars. It contains these keys:<br>
+     * The stats-job command gives statistical information about the specified job
+     * if it exists.<br>
+     * The stats-job data is a YAML file representing a single dictionary of strings
+     * to scalars. It contains these keys:<br>
      * - "id" is the job id<br>
      * - "tube" is the name of the tube that contains this job<br>
      * - "state" is "ready" or "delayed" or "reserved" or "buried"<br>
      * - "pri" is the priority value set by the put, release, or bury commands.<br>
      * - "age" is the time in seconds since the put command that created this
      * job.<br>
-     * - "time-left" is the number of seconds left until the server puts this
-     * job into the ready queue. This number is only meaningful if the job is
-     * reserved or delayed. If the job is reserved and this amount of time
-     * elapses before its state changes, it is considered to have timed out.<br>
+     * - "time-left" is the number of seconds left until the server puts this job
+     * into the ready queue. This number is only meaningful if the job is reserved
+     * or delayed. If the job is reserved and this amount of time elapses before its
+     * state changes, it is considered to have timed out.<br>
      * - "timeouts" is the number of times this job has timed out during a
      * reservation.<br>
      * - "releases" is the number of times a client has released this job from a
@@ -125,23 +123,23 @@ public interface BeanstalkClient extends JobConsumer, JobProducer {
      * - "kicks" is the number of times this job has been kicked.<br>
      * 
      * @param jobId
-     * @return a sequence of bytes. It is a YAML file with statistical
-     *         information represented a dictionary.
+     * @return a sequence of bytes. It is a YAML file with statistical information
+     *         represented a dictionary.
      */
     public Map<String, String> statsJob(long jobId);
 
     /**
-     * The stats-tube command gives statistical information about the specified
-     * tube if it exists.<br>
+     * The stats-tube command gives statistical information about the specified tube
+     * if it exists.<br>
      * The stats-tube data is a YAML file representing a single dictionary of
      * strings to scalars. It contains these keys:<br>
      * - "name" is the tube's name.<br>
-     * - "current-jobs-urgent" is the number of ready jobs with priority < 1024
-     * in this tube.<br>
+     * - "current-jobs-urgent" is the number of ready jobs with priority < 1024 in
+     * this tube.<br>
      * - "current-jobs-ready" is the number of jobs in the ready queue in this
      * tube.<br>
-     * - "current-jobs-reserved" is the number of jobs reserved by all clients
-     * in this tube.<br>
+     * - "current-jobs-reserved" is the number of jobs reserved by all clients in
+     * this tube.<br>
      * - "current-jobs-delayed" is the number of delayed jobs in this tube.<br>
      * - "current-jobs-buried" is the number of buried jobs in this tube.<br>
      * - "total-jobs" is the cumulative count of jobs created in this tube.<br>
@@ -156,8 +154,8 @@ public interface BeanstalkClient extends JobConsumer, JobProducer {
     /**
      * The stats command gives statistical information about the system as a
      * whole.<br>
-     * The stats data for the system is a YAML file representing a single
-     * dictionary of strings to scalars. It contains these keys:<br>
+     * The stats data for the system is a YAML file representing a single dictionary
+     * of strings to scalars. It contains these keys:<br>
      * - "current-jobs-urgent" is the number of ready jobs with priority < 1024.<br>
      * - "current-jobs-ready" is the number of jobs in the ready queue.<br>
      * - "current-jobs-reserved" is the number of jobs reserved by all clients.<br>
@@ -189,17 +187,17 @@ public interface BeanstalkClient extends JobConsumer, JobProducer {
      * - "max-job-size" is the maximum number of bytes in a job.<br>
      * - "current-tubes" is the number of currently-existing tubes.<br>
      * - "current-connections" is the number of currently open connections.<br>
-     * - "current-producers" is the number of open connections that have each
-     * issued at least one put command.<br>
-     * - "current-workers" is the number of open connections that have each
-     * issued at least one reserve command.<br>
+     * - "current-producers" is the number of open connections that have each issued
+     * at least one put command.<br>
+     * - "current-workers" is the number of open connections that have each issued
+     * at least one reserve command.<br>
      * - "current-waiting" is the number of open connections that have issued a
      * reserve command but not yet received a response.<br>
      * - "total-connections" is the cumulative count of connections.<br>
      * - "pid" is the process id of the server.<br>
      * - "version" is the version string of the server. <br>
-     * - "rusage-utime" is the accumulated user CPU time of this process in
-     * seconds and microseconds.<br>
+     * - "rusage-utime" is the accumulated user CPU time of this process in seconds
+     * and microseconds.<br>
      * - "rusage-stime" is the accumulated system CPU time of this process in
      * seconds and microseconds.<br>
      * - "uptime" is the number of seconds since this server started running.<br>
@@ -207,8 +205,8 @@ public interface BeanstalkClient extends JobConsumer, JobProducer {
      * store the current jobs<br>
      * - "binlog-current-index" is the index of the current binlog file being
      * written to. If binlog is not active this value will be 0<br>
-     * - "binlog-max-size" is the maximum size in bytes a binlog file is allowed
-     * to get before a new binlog file is opened<br>
+     * - "binlog-max-size" is the maximum size in bytes a binlog file is allowed to
+     * get before a new binlog file is opened<br>
      * 
      * @return
      */
@@ -230,10 +228,16 @@ public interface BeanstalkClient extends JobConsumer, JobProducer {
     public String listTubeUsed();
 
     /**
-     * The list-tubes-watched command returns a list tubes currently being
-     * watched by the client.
+     * The list-tubes-watched command returns a list tubes currently being watched
+     * by the client.
      * 
      * @return
      */
     public List<String> listTubeWatched();
+
+    /**
+     * close the current connection and release resources. that's status is closed,
+     * and is no longer available.
+     */
+    public void close();
 }

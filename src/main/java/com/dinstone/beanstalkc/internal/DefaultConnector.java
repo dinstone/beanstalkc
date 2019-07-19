@@ -41,108 +41,111 @@ import com.dinstone.beanstalkc.internal.codec.OperationEncoder;
  */
 public class DefaultConnector implements Connector {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultConnector.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultConnector.class);
 
-    private NioSocketConnector ioConnector;
+	private NioSocketConnector ioConnector;
 
-    private int refCount;
+	private int refCount;
 
-    /**
-     * @param config
-     * @param ioConnector
-     */
-    public DefaultConnector(Configuration config) {
-        initConnector(config);
-    }
+	/**
+	 * @param config
+	 * @param ioConnector
+	 */
+	public DefaultConnector(Configuration config) {
+		initConnector(config);
+	}
 
-    /**
-     * @param config
-     */
-    private void initConnector(Configuration config) {
-        // create connector
-        ioConnector = new NioSocketConnector();
-        SocketSessionConfig sessionConfig = ioConnector.getSessionConfig();
-        LOG.debug("KeepAlive is {}", sessionConfig.isKeepAlive());
-        LOG.debug("ReadBufferSize is {}", sessionConfig.getReadBufferSize());
-        LOG.debug("SendBufferSize is {}", sessionConfig.getSendBufferSize());
+	/**
+	 * @param config
+	 */
+	private void initConnector(Configuration config) {
+		// create connector
+		ioConnector = new NioSocketConnector();
+		ioConnector.setConnectTimeoutMillis(config.getConnectTimeout());
 
-        // add filter
-        DefaultIoFilterChainBuilder chainBuilder = ioConnector.getFilterChain();
+		SocketSessionConfig sessionConfig = ioConnector.getSessionConfig();
+		LOG.debug("KeepAlive is {}", sessionConfig.isKeepAlive());
+		LOG.debug("ReadBufferSize is {}", sessionConfig.getReadBufferSize());
+		LOG.debug("SendBufferSize is {}", sessionConfig.getSendBufferSize());
+		sessionConfig.setReaderIdleTime(config.getReadTimeout());
 
-        String charsetName = config.getProtocolCharset();
-        Charset charset = Charset.forName(charsetName == null ? "ASCII" : charsetName);
-        LOG.debug("beanstalk.protocol.charset is {}", charset);
+		// add filter
+		DefaultIoFilterChainBuilder chainBuilder = ioConnector.getFilterChain();
 
-        final OperationEncoder encoder = new OperationEncoder(charset);
-        final OperationDecoder decoder = new OperationDecoder(charset);
-        chainBuilder.addLast("codec", new ProtocolCodecFilter(new ProtocolCodecFactory() {
+		String charsetName = config.getProtocolCharset();
+		Charset charset = Charset.forName(charsetName == null ? "ASCII" : charsetName);
+		LOG.debug("beanstalk.protocol.charset is {}", charset);
 
-            @Override
-            public ProtocolEncoder getEncoder(IoSession session) throws Exception {
-                return encoder;
-            }
+		final OperationEncoder encoder = new OperationEncoder(charset);
+		final OperationDecoder decoder = new OperationDecoder(charset);
+		chainBuilder.addLast("codec", new ProtocolCodecFilter(new ProtocolCodecFactory() {
 
-            @Override
-            public ProtocolDecoder getDecoder(IoSession session) throws Exception {
-                return decoder;
-            }
-        }));
+			@Override
+			public ProtocolEncoder getEncoder(IoSession session) throws Exception {
+				return encoder;
+			}
 
-        // set handler
-        ioConnector.setHandler(new ConnectionHandler());
+			@Override
+			public ProtocolDecoder getDecoder(IoSession session) throws Exception {
+				return decoder;
+			}
+		}));
 
-        InetSocketAddress address = new InetSocketAddress(config.getServiceHost(), config.getServicePort());
-        ioConnector.setDefaultRemoteAddress(address);
-    }
+		// set handler
+		ioConnector.setHandler(new ConnectionHandler());
 
-    /**
-     * @return
-     */
-    @Override
-    public IoSession createSession() {
-        LOG.debug("Connecting to beanstalkd service on {}", ioConnector.getDefaultRemoteAddress());
-        // create session
-        ConnectFuture cf = ioConnector.connect().awaitUninterruptibly();
+		InetSocketAddress address = new InetSocketAddress(config.getServiceHost(), config.getServicePort());
+		ioConnector.setDefaultRemoteAddress(address);
+	}
 
-        try {
-            IoSession session = cf.getSession();
-            return session;
-        } catch (RuntimeException e) {
-            throw new ConnectionException("can't connect beanstalkd service on "
-                    + ioConnector.getDefaultRemoteAddress(), e);
-        }
-    }
+	/**
+	 * @return
+	 */
+	@Override
+	public IoSession createSession() {
+		LOG.debug("Connecting to beanstalkd service on {}", ioConnector.getDefaultRemoteAddress());
+		// create session
+		ConnectFuture cf = ioConnector.connect().awaitUninterruptibly();
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see com.dinstone.beanstalkc.internal.Connector#dispose()
-     */
-    @Override
-    public void dispose() {
-        ioConnector.dispose(false);
-    }
+		try {
+			IoSession session = cf.getSession();
+			return session;
+		} catch (RuntimeException e) {
+			throw new ConnectionException(
+					"can't connect beanstalkd service on " + ioConnector.getDefaultRemoteAddress(), e);
+		}
+	}
 
-    /**
-     *
-     */
-    public void incrementRefCount() {
-        ++refCount;
-    }
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @see com.dinstone.beanstalkc.internal.Connector#dispose()
+	 */
+	@Override
+	public void dispose() {
+		ioConnector.dispose(false);
+	}
 
-    /**
-     *
-     */
-    public void decrementRefCount() {
-        if (refCount > 0) {
-            --refCount;
-        }
-    }
+	/**
+	 *
+	 */
+	public void incrementRefCount() {
+		++refCount;
+	}
 
-    /**
-     * @return
-     */
-    public boolean isZeroRefCount() {
-        return refCount == 0;
-    }
+	/**
+	 *
+	 */
+	public void decrementRefCount() {
+		if (refCount > 0) {
+			--refCount;
+		}
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isZeroRefCount() {
+		return refCount == 0;
+	}
 }

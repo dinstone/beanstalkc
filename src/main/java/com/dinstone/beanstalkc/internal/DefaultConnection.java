@@ -65,7 +65,6 @@ public class DefaultConnection implements Connection {
         closed = true;
     }
 
-    @Override
     public synchronized void destroy() {
         if (isConnected()) {
             ioSession.close(true);

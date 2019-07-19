@@ -23,7 +23,8 @@ import com.dinstone.beanstalkc.internal.operation.UseOperation;
 import com.dinstone.beanstalkc.internal.operation.WatchOperation;
 
 /**
- * {@link BeanstalkClientFactory} is a factory class, that is responsible for the creation beanstalk client.
+ * {@link BeanstalkClientFactory} is a factory class, that is responsible for
+ * the creation beanstalk client.
  * 
  * @author guojf
  * @version 2.0.0.2013-4-17
@@ -33,17 +34,9 @@ public class BeanstalkClientFactory {
     private Configuration configuration = new Configuration();
 
     /**
-     * default factory construction.
-     */
-    public BeanstalkClientFactory() {
-        super();
-    }
-
-    /**
      * factory construction.
      * 
-     * @param config
-     *        beanstalk client configuration
+     * @param config beanstalk client configuration
      */
     public BeanstalkClientFactory(Configuration config) {
         if (config == null) {
@@ -64,8 +57,7 @@ public class BeanstalkClientFactory {
     /**
      * create a job consumer.
      * 
-     * @param watchTubes
-     *        the named tube to the watch list for the current connection
+     * @param watchTubes the named tube to the watch list for the current connection
      * @return a beanstalk client
      */
     public JobConsumer createJobConsumer(final String... watchTubes) {
@@ -91,8 +83,7 @@ public class BeanstalkClientFactory {
     /**
      * create a job producer.
      * 
-     * @param useTube
-     *        the name of the tube now being used
+     * @param useTube the name of the tube now being used
      * @return a beanstalk client
      */
     public JobProducer createJobProducer(final String useTube) {
@@ -106,10 +97,6 @@ public class BeanstalkClientFactory {
             }
         };
         return new DefaultBeanstalkClient(configuration, initer);
-    }
-
-    public Configuration getConfiguration() {
-        return configuration;
     }
 
 }

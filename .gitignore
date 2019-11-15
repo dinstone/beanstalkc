@@ -2,6 +2,6 @@
 /target
 /.classpath
 /.project
-/.settings
+/.settings/
 /beanstalkc.iml
 /.idea
